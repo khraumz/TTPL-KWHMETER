@@ -190,13 +190,13 @@
       margin: 0;
     }
 
-    /* Digital LCD Box (Rugged Earth Tester display) */
+    /* Digital Display Box (White with 3D Shadow) */
     .lcd-display {
-      background: #0a1410;
-      border-radius: 10px;
-      padding: 12px 14px;
-      border: 2px solid #1e293b;
-      box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 16px 14px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 10px 25px -4px rgba(14, 165, 233, 0.18), 0 4px 10px -2px rgba(15, 23, 42, 0.05), inset 0 1px 2px #ffffff;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -204,21 +204,13 @@
     }
 
     .lcd-resistance {
-      font-family: monospace;
-      font-size: 34px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 38px;
       font-weight: 900;
-      color: #34d399;
-      text-shadow: 0 0 10px rgba(52, 211, 153, 0.6);
+      color: #004FBD;
       letter-spacing: -0.5px;
       line-height: 1.1;
-    }
-
-    .lcd-sub {
-      font-size: 10.5px;
-      color: #94a3b8;
-      margin-top: 4px;
-      font-family: monospace;
-      letter-spacing: 0.3px;
+      text-shadow: 0 1px 2px rgba(0, 79, 189, 0.15);
     }
 
     /* Status Badge */
@@ -304,17 +296,17 @@
     /* Interaction Hint */
     .interaction-hint {
       position: absolute;
-      bottom: 112px;
+      bottom: 155px;
       left: 50%;
       transform: translateX(-50%);
       font-size: 11.5px;
       font-weight: 700;
-      color: #64748b;
+      color: #0f2744;
       background: #ffffff;
-      border: 1px solid #e2e8f0;
-      padding: 4px 14px;
+      border: 1px solid #cbd5e1;
+      padding: 6px 18px;
       border-radius: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
       pointer-events: none;
       z-index: 10;
       white-space: nowrap;
@@ -471,9 +463,10 @@
     /* Responsive */
     @media (max-width: 860px) {
       .curve-card { display: none; }
-      .instrument-card { width: calc(100% - 40px); left: 20px; top: auto; bottom: 140px; }
+      .instrument-card { width: calc(100% - 40px); left: 20px; top: auto; bottom: 150px; }
       .control-panel { width: calc(100% - 40px); padding: 10px 14px; }
       .control-row-sliders { flex-direction: column; gap: 8px; }
+      .interaction-hint { display: none; }
     }
   </style>
 </head>
@@ -499,8 +492,9 @@
     <!-- View Switcher & Language Toggle -->
     <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
       <div class="hdr-tabs-container">
-        <button id="hdr-btn-hemi" class="hdr-nav-btn active" type="button">Bola Potensial (Hemispheres)</button>
         <button id="hdr-btn-wires" class="hdr-nav-btn active" type="button">Kabel Alat Uji</button>
+        <button id="hdr-btn-cam-field" class="hdr-nav-btn active" type="button">🔭 Lapangan Lengkap</button>
+        <button id="hdr-btn-cam-house" class="hdr-nav-btn" type="button">🏠 Gedung &amp; Kotak Uji</button>
       </div>
 
       <button id="hdr-btn-lang" class="hdr-lang-btn" type="button" title="Ganti Bahasa / Switch Language">
@@ -553,10 +547,9 @@
       <span style="font-size: 10px; font-weight: 800; background: rgba(0, 79, 189, 0.08); color: #004FBD; padding: 2px 6px; border-radius: 4px;">128 Hz AC</span>
     </div>
 
-    <!-- LCD Display -->
+    <!-- Display Box -->
     <div class="lcd-display">
       <div class="lcd-resistance" id="lcd-val-r">4.28 Ω</div>
-      <div class="lcd-sub" id="lcd-val-sub">V_EP: 0.11 V | I_test: 25 mA | R_E: 4.28 Ω</div>
     </div>
 
     <!-- Standard Compliance Badge -->
@@ -567,16 +560,12 @@
     <!-- Real-time Diagnostics -->
     <div class="diag-box">
       <div class="diag-row">
-        <span class="diag-label" id="lbl-diag-pos">Posisi Pasak Potensial P:</span>
+        <span class="diag-label" id="lbl-diag-pos">Posisi Elektroda Potensial P:</span>
         <span class="diag-val" id="diag-val-pos">x = 24.7 m (61.8% D)</span>
       </div>
       <div class="diag-row">
-        <span class="diag-label" id="lbl-diag-true">Tahanan Pentanahan Sejati R_E:</span>
+        <span class="diag-label" id="lbl-diag-true">Resistansi:</span>
         <span class="diag-val" id="diag-val-true">4.28 Ω</span>
-      </div>
-      <div class="diag-row">
-        <span class="diag-label" id="lbl-diag-plat">Kemiringan Zona Datar (52-72%):</span>
-        <span class="diag-val" style="color: #059669;" id="diag-val-plat">0.8% (Zona Valid)</span>
       </div>
       <div class="diag-row">
         <span class="diag-label" id="lbl-diag-soil">Resistivitas Tanah (ρ):</span>
@@ -586,7 +575,7 @@
   </div>
 
   <!-- Interaction Hint -->
-  <div class="interaction-hint" id="txt-hint">Tarik Pasak P (Kuning) di atas tanah 3D atau geser slider | Klik Kiri: Putar Kamera | Scroll: Zoom</div>
+  <div class="interaction-hint" id="txt-hint">Tarik Elektroda P (Kuning) di atas tanah 3D atau geser slider | Klik Kiri: Putar Kamera | Scroll: Zoom</div>
 
   <!-- Bottom Control Panel -->
   <div class="control-panel">
@@ -594,16 +583,16 @@
       <!-- Potential Probe Distance x Slider -->
       <div class="slider-item">
         <div class="slider-header">
-          <span id="lbl-slider-p">Posisi Pasak Potensial P (x dari E)</span>
+          <span id="lbl-slider-p">Posisi Elektroda Potensial P (x dari E)</span>
           <span class="val-tag tag-yellow" id="tag-probe-val">x = 24.7 m (61.8% D)</span>
         </div>
-        <input type="range" class="slider-probe" id="range-probe-x" min="1" max="39" step="0.2" value="24.7">
+        <input type="range" class="slider-probe" id="range-probe-x" min="10" max="39" step="0.2" value="24.7">
       </div>
 
       <!-- Current Probe Distance D Slider -->
       <div class="slider-item">
         <div class="slider-header">
-          <span id="lbl-slider-d">Jarak Pasak Arus C (D)</span>
+          <span id="lbl-slider-d">Jarak Elektroda Current C (D)</span>
           <span class="val-tag tag-blue" id="tag-current-val">D = 40.0 m</span>
         </div>
         <input type="range" class="slider-dist" id="range-dist-d" min="15" max="80" step="1" value="40">
@@ -873,31 +862,257 @@
     testerGroup.position.set(2.8, 0, 3.5);
     scene.add(testerGroup);
 
-    // --- UNDERGROUND EQUIPOTENTIAL HEMISPHERES OF INFLUENCE ---
-    const hemiGroup = new THREE.Group();
-    const hemiMat_E = new THREE.MeshStandardMaterial({
-      color: 0x004FBD,
-      transparent: true,
-      opacity: 0.18,
-      roughness: 0.8,
-      side: THREE.DoubleSide
-    });
-    const hemiMesh_E = new THREE.Mesh(new THREE.SphereGeometry(6.5, 32, 16, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), hemiMat_E);
-    hemiMesh_E.position.set(0, 0, 0);
-    hemiGroup.add(hemiMesh_E);
+    // =========================================================================
+    // 3B. 3D BUILDING WITH LIGHTNING PROTECTION SYSTEM (LPS)
+    // Structure: Air Terminal (Roof) -> Down Conductor -> Test Box -> Electrode E
+    // =========================================================================
+    const buildingGroup = new THREE.Group();
 
-    const hemiMat_C = new THREE.MeshStandardMaterial({
-      color: 0xef4444,
-      transparent: true,
-      opacity: 0.18,
-      roughness: 0.8,
-      side: THREE.DoubleSide
-    });
-    const hemiMesh_C = new THREE.Mesh(new THREE.SphereGeometry(5.0, 32, 16, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), hemiMat_C);
-    hemiMesh_C.position.set(dist_D, 0, 0);
-    hemiGroup.add(hemiMesh_C);
+    // 1. Concrete Foundation / Plinth
+    const plinthGeom = new THREE.BoxGeometry(9.0, 0.4, 6.6);
+    const plinthMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8 });
+    const plinth = new THREE.Mesh(plinthGeom, plinthMat);
+    plinth.position.set(-8.5, 0.2, -6.0);
+    plinth.receiveShadow = true;
+    buildingGroup.add(plinth);
 
-    scene.add(hemiGroup);
+    // 2. Main Building Structure (Stucco / Concrete walls)
+    const wallGeom = new THREE.BoxGeometry(8.6, 4.0, 6.2);
+    const wallMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.75 });
+    const wall = new THREE.Mesh(wallGeom, wallMat);
+    wall.position.set(-8.5, 2.4, -6.0);
+    wall.castShadow = true;
+    wall.receiveShadow = true;
+    buildingGroup.add(wall);
+
+    // Front Corner Accent Column (near ground test area)
+    const colGeom = new THREE.BoxGeometry(0.5, 4.0, 0.5);
+    const colMat = new THREE.MeshStandardMaterial({ color: 0x004FBD, roughness: 0.5 });
+    const col = new THREE.Mesh(colGeom, colMat);
+    col.position.set(-4.2, 2.4, -2.9);
+    buildingGroup.add(col);
+
+    // Front Entrance Door
+    const doorGeom = new THREE.BoxGeometry(1.6, 2.6, 0.1);
+    const doorMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5 });
+    const door = new THREE.Mesh(doorGeom, doorMat);
+    door.position.set(-9.5, 1.7, -2.85);
+    buildingGroup.add(door);
+
+    // Front Windows with reflective blue-tinted glass
+    const winFrameGeom = new THREE.BoxGeometry(2.0, 1.6, 0.1);
+    const winFrameMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
+    const winGlassMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.1, metalness: 0.85, opacity: 0.75, transparent: true });
+
+    const win1 = new THREE.Mesh(winFrameGeom, winFrameMat);
+    win1.position.set(-6.5, 2.6, -2.85);
+    const glass1 = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.4, 0.12), winGlassMat);
+    win1.add(glass1);
+    buildingGroup.add(win1);
+
+    // 3. Gable Roof (Pitched slate tile roof)
+    const roofGroup = new THREE.Group();
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 });
+
+    // Front roof slope
+    const slopeGeom = new THREE.BoxGeometry(9.4, 0.15, 3.8);
+    const slopeFront = new THREE.Mesh(slopeGeom, roofMat);
+    slopeFront.position.set(-8.5, 5.25, -4.5);
+    slopeFront.rotation.x = 0.55;
+    slopeFront.castShadow = true;
+    roofGroup.add(slopeFront);
+
+    // Back roof slope
+    const slopeBack = new THREE.Mesh(slopeGeom, roofMat);
+    slopeBack.position.set(-8.5, 5.25, -7.5);
+    slopeBack.rotation.x = -0.55;
+    slopeBack.castShadow = true;
+    roofGroup.add(slopeBack);
+
+    // Ridge cap
+    const ridgeCap = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 9.5, 12), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 }));
+    ridgeCap.rotation.z = Math.PI / 2;
+    ridgeCap.position.set(-8.5, 6.25, -6.0);
+    roofGroup.add(ridgeCap);
+
+    // Gable triangular side wall (facing +X, towards electrode E)
+    const gableShape = new THREE.Shape();
+    gableShape.moveTo(-3.1, 0);
+    gableShape.lineTo(3.1, 0);
+    gableShape.lineTo(0, 1.85);
+    gableShape.closePath();
+    const gableGeom = new THREE.ShapeGeometry(gableShape);
+    const gableRight = new THREE.Mesh(gableGeom, wallMat);
+    gableRight.rotation.y = Math.PI / 2;
+    gableRight.position.set(-4.2, 4.4, -6.0);
+    roofGroup.add(gableRight);
+
+    buildingGroup.add(roofGroup);
+
+    // 4. AIR TERMINAL (PENANGKAL PETIR / FRANKLIN ROD)
+    // Mounted at highest point of ridge
+    const airTerminalGroup = new THREE.Group();
+    const atBase = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.26, 0.22, 16), brassMat);
+    atBase.position.y = 6.36;
+    airTerminalGroup.add(atBase);
+
+    // Vertical copper rod (1.6m height)
+    const atRod = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.05, 1.6, 16), copperMat);
+    atRod.position.y = 7.25;
+    atRod.castShadow = true;
+    airTerminalGroup.add(atRod);
+
+    // Sharp copper needle finial
+    const atPoint = new THREE.Mesh(new THREE.ConeGeometry(0.048, 0.35, 16), copperMat);
+    atPoint.position.y = 8.22;
+    airTerminalGroup.add(atPoint);
+
+    // 3-point auxiliary receptor prongs
+    for (let i = 0; i < 3; i++) {
+      const angle = (i * Math.PI * 2) / 3;
+      const prong = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.025, 0.45), copperMat);
+      prong.position.set(Math.sin(angle) * 0.12, 7.85, Math.cos(angle) * 0.12);
+      prong.rotation.z = Math.sin(angle) * 0.55;
+      prong.rotation.x = Math.cos(angle) * 0.55;
+      airTerminalGroup.add(prong);
+    }
+    airTerminalGroup.position.set(-6.5, 0, -6.0);
+    buildingGroup.add(airTerminalGroup);
+
+    // 5. DOWN CONDUCTOR (PENYALUR PETIR)
+    // Bare copper conductor running from Air Terminal along the ridge, down roof slope, down wall corner
+    const downConductorGroup = new THREE.Group();
+    const dcPoints = [
+      new THREE.Vector3(-6.5, 6.36, -6.0),     // Air terminal base
+      new THREE.Vector3(-4.2, 6.25, -6.0),     // Ridge to gable corner
+      new THREE.Vector3(-4.18, 4.35, -2.85),   // Down along roof edge to eave
+      new THREE.Vector3(-4.18, 1.6, -2.85)     // Down wall corner to Test Box
+    ];
+    const dcCurve = new THREE.CatmullRomCurve3(dcPoints);
+    const dcGeom = new THREE.TubeGeometry(dcCurve, 32, 0.035, 8, false);
+    const dcMesh = new THREE.Mesh(dcGeom, copperMat);
+    dcMesh.castShadow = true;
+    downConductorGroup.add(dcMesh);
+
+    // Brass wall mounting clips along down conductor
+    [3.6, 2.8, 2.0].forEach(y => {
+      const clip = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.12), brassMat);
+      clip.position.set(-4.18, y, -2.85);
+      downConductorGroup.add(clip);
+    });
+    buildingGroup.add(downConductorGroup);
+
+    // 6. KOTAK TERMINAL UJI (INSPECTION / TEST LINK BOX)
+    // Wall-mounted test box at Y = 1.2m
+    const testBoxGroup = new THREE.Group();
+    // Metal enclosure body
+    const tbBody = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.75, 0.22), new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.6, roughness: 0.4 }));
+    tbBody.position.set(-4.18, 1.2, -2.75);
+    tbBody.castShadow = true;
+    testBoxGroup.add(tbBody);
+
+    // White interior face plate
+    const tbPlate = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.65, 0.04), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 }));
+    tbPlate.position.set(-4.18, 1.2, -2.63);
+    testBoxGroup.add(tbPlate);
+
+    // Removable Copper Test Link Bar
+    const testLink = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.38, 0.05), brassMat);
+    testLink.position.set(-4.18, 1.2, -2.59);
+    testBoxGroup.add(testLink);
+
+    // Upper and lower hex clamp bolts
+    const boltTop = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.08, 6), steelMat);
+    boltTop.rotation.x = Math.PI / 2;
+    boltTop.position.set(-4.18, 1.32, -2.55);
+    testBoxGroup.add(boltTop);
+
+    const boltBtm = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.08, 6), steelMat);
+    boltBtm.rotation.x = Math.PI / 2;
+    boltBtm.position.set(-4.18, 1.08, -2.55);
+    testBoxGroup.add(boltBtm);
+
+    // Yellow warning header banner on the test box
+    const tbBanner = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.12, 0.02), new THREE.MeshStandardMaterial({ color: 0xFFF100 }));
+    tbBanner.position.set(-4.18, 1.48, -2.62);
+    testBoxGroup.add(tbBanner);
+
+    buildingGroup.add(testBoxGroup);
+
+    // 7. GROUNDING CONDUCTOR FROM TEST BOX TO ELECTRODE E AT (0, 0, 0)
+    // Conductor exits bottom of test box at Y=0.85, goes down to ground Y=0.06, then curves to E clamp at (0, 0.55, 0)
+    const earthLeadPoints = [
+      new THREE.Vector3(-4.18, 0.85, -2.85),
+      new THREE.Vector3(-4.18, 0.06, -2.85),
+      new THREE.Vector3(-2.8, 0.05, -2.0),
+      new THREE.Vector3(-1.2, 0.05, -0.8),
+      new THREE.Vector3(0, 0.55, 0)
+    ];
+    const earthLeadCurve = new THREE.CatmullRomCurve3(earthLeadPoints);
+    const earthLeadGeom = new THREE.TubeGeometry(earthLeadCurve, 32, 0.04, 8, false);
+    const earthLeadMesh = new THREE.Mesh(earthLeadGeom, copperMat);
+    earthLeadMesh.castShadow = true;
+    buildingGroup.add(earthLeadMesh);
+
+    scene.add(buildingGroup);
+
+    // --- 3D FLOATING CALLOUT LABELS (BILLBOARD SPRITES) ---
+    function makeTextBadge(text, colorHex = "#0f2744", bgHex = "#ffffff", borderHex = "#cbd5e1") {
+      const cvs = document.createElement("canvas");
+      cvs.width = 384;
+      cvs.height = 84;
+      const c = cvs.getContext("2d");
+      c.fillStyle = bgHex;
+      c.beginPath();
+      c.roundRect(4, 4, 376, 76, 38);
+      c.fill();
+      c.lineWidth = 4;
+      c.strokeStyle = borderHex;
+      c.stroke();
+      c.fillStyle = colorHex;
+      c.font = "bold 27px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif";
+      c.textAlign = "center";
+      c.textBaseline = "middle";
+      c.fillText(text, 192, 42);
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.minFilter = THREE.LinearFilter;
+      const mat = new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true });
+      const sp = new THREE.Sprite(mat);
+      sp.scale.set(3.4, 0.75, 1);
+      return sp;
+    }
+
+    let badgeSprites = {};
+    function updateBadgeLabels() {
+      const isEn = (currentLang === 'en');
+      for (const key in badgeSprites) {
+        scene.remove(badgeSprites[key]);
+      }
+
+      badgeSprites.air = makeTextBadge(isEn ? "⚡ Air Terminal (Lightning Rod)" : "⚡ Penangkal Petir (Air Terminal)", "#0f2744", "#ffffff", "#004FBD");
+      badgeSprites.air.position.set(-6.5, 8.8, -6.0);
+      scene.add(badgeSprites.air);
+
+      badgeSprites.dc = makeTextBadge(isEn ? "⚡ Down Conductor" : "⚡ Penyalur Petir (Down Conductor)", "#0f2744", "#ffffff", "#b45309");
+      badgeSprites.dc.position.set(-4.2, 3.2, -2.2);
+      scene.add(badgeSprites.dc);
+
+      badgeSprites.box = makeTextBadge(isEn ? "🔍 Inspection Test Box" : "🔍 Kotak Terminal Uji (Test Box)", "#0f2744", "#ffffff", "#059669");
+      badgeSprites.box.position.set(-4.2, 1.85, -2.0);
+      scene.add(badgeSprites.box);
+
+      badgeSprites.e = makeTextBadge(isEn ? "🟢 Main Ground Electrode (E)" : "🟢 Elektroda Utama (E)", "#0f2744", "#ffffff", "#059669");
+      badgeSprites.e.position.set(0, 1.8, 0);
+      scene.add(badgeSprites.e);
+
+      badgeSprites.p = makeTextBadge(isEn ? "🟡 Potential Stake (P)" : "🟡 Pasak Potensial (P)", "#0f2744", "#ffffff", "#eab308");
+      badgeSprites.p.position.set(pos_x, 1.8, 0);
+      scene.add(badgeSprites.p);
+
+      badgeSprites.c = makeTextBadge(isEn ? "🔴 Current Stake (C)" : "🔴 Pasak Arus (C)", "#0f2744", "#ffffff", "#ef4444");
+      badgeSprites.c.position.set(dist_D, 1.8, 0);
+      scene.add(badgeSprites.c);
+    }
 
     // --- DYNAMIC CABLES (CATENARY CURVES CONNECTING TESTER TO RODS) ---
     let cableE_Line = null, cableP_Line = null, cableC_Line = null;
@@ -924,7 +1139,7 @@
       const tP = new THREE.Vector3(2.8, 1.25, 3.95);
       const tC = new THREE.Vector3(3.4, 1.25, 3.95);
 
-      const targetE = new THREE.Vector3(0, 0.5, 0);
+      const targetE = new THREE.Vector3(0, 0.55, 0);
       const targetP = new THREE.Vector3(pos_x, 0.8, 0);
       const targetC = new THREE.Vector3(dist_D, 0.8, 0);
 
@@ -1008,59 +1223,45 @@
     const tagCurrentVal = document.getElementById("tag-current-val");
 
     const lcdValR = document.getElementById("lcd-val-r");
-    const lcdValSub = document.getElementById("lcd-val-sub");
     const badgeCompliance = document.getElementById("badge-compliance");
     const diagValPos = document.getElementById("diag-val-pos");
     const diagValTrue = document.getElementById("diag-val-true");
-    const diagValPlat = document.getElementById("diag-val-plat");
     const diagValRho = document.getElementById("diag-val-rho");
 
     function updateSimulation() {
-      // Keep probe inside [0.5, D - 0.5]
+      // Keep probe inside [10.0, D - 0.5]
+      rangeProbe.min = "10";
       rangeProbe.max = (dist_D - 0.5).toFixed(1);
-      pos_x = Math.max(0.5, Math.min(dist_D - 0.5, pos_x));
+      pos_x = Math.max(10.0, Math.min(dist_D - 0.5, pos_x));
       rangeProbe.value = pos_x;
 
       stakeP_Group.position.x = pos_x;
       stakeC_Group.position.x = dist_D;
-      hemiMesh_C.position.x = dist_D;
+      if (badgeSprites.p) badgeSprites.p.position.x = pos_x;
+      if (badgeSprites.c) badgeSprites.c.position.x = dist_D;
 
       // Calculations
-      const { R_meas, R_true, V_EP } = calcFOP(pos_x, dist_D, rho);
+      const { R_meas, R_true } = calcFOP(pos_x, dist_D, rho);
       const pctD = ((pos_x / dist_D) * 100).toFixed(1);
 
       tagProbeVal.textContent = `x = ${pos_x.toFixed(1)} m (${pctD}% D)`;
       tagCurrentVal.textContent = `D = ${dist_D.toFixed(1)} m`;
 
-      // LCD Display
+      // LCD Display (White with 3D Shadow)
       lcdValR.textContent = `${R_meas.toFixed(2)} Ω`;
-      lcdValSub.textContent = `V_EP: ${V_EP.toFixed(2)} V | I_test: 25 mA | R_E: ${R_true.toFixed(2)} Ω`;
-
-      // Plateau 52%-62%-72% Flatness Test (IEEE Std 81)
-      const R_52 = calcFOP(0.52 * dist_D, dist_D, rho).R_meas;
-      const R_62 = calcFOP(0.618 * dist_D, dist_D, rho).R_meas;
-      const R_72 = calcFOP(0.72 * dist_D, dist_D, rho).R_meas;
-      const slopeVar = (100 * Math.abs(R_72 - R_52) / Math.max(2 * R_62, 1e-3)).toFixed(1);
 
       // Diagnostics values
       diagValPos.textContent = `x = ${pos_x.toFixed(1)} m (${pctD}% D)`;
-      diagValTrue.textContent = `${R_true.toFixed(2)} Ω`;
+      diagValTrue.textContent = `${R_meas.toFixed(2)} Ω`;
       diagValRho.textContent = `${rho} Ω·m`;
 
       const isEn = (currentLang === 'en');
-
-      if (parseFloat(slopeVar) <= 5.0) {
-        diagValPlat.textContent = `${slopeVar}% (${isEn ? 'Plateau Valid' : 'Zona Datar Valid'})`;
-        diagValPlat.style.color = "#059669";
-      } else {
-        diagValPlat.textContent = `${slopeVar}% (${isEn ? 'Overlap! Increase D' : 'Tumpang Tindih! Perbesar D'})`;
-        diagValPlat.style.color = "#ef4444";
-      }
 
       // Compliance standard badge (PLN <= 1 Ohm, IEEE <= 5 Ohm)
       if (R_meas <= 1.0) {
         badgeCompliance.textContent = isEn ? "STATUS: MEETS PLN (≤ 1 Ω) & IEEE (≤ 5 Ω) STANDARDS" : "STATUS: LOLOS STANDAR PLN (≤ 1 Ω) & IEEE (≤ 5 Ω)";
         badgeCompliance.style.background = "#059669";
+        badgeCompliance.style.color = "#ffffff";
       } else if (R_meas <= 5.0) {
         badgeCompliance.textContent = isEn ? "STATUS: MEETS IEEE STD 81 (≤ 5 Ω) | EXCEEDS PLN (> 1 Ω)" : "STATUS: MEMENUHI IEEE (≤ 5 Ω) | MELEBIHI PLN (> 1 Ω)";
         badgeCompliance.style.background = "#eab308";
@@ -1141,7 +1342,7 @@
 
       raycaster.setFromCamera(mouse, camera);
       if (raycaster.ray.intersectPlane(planeGround, planeIntersect)) {
-        pos_x = Math.max(0.8, Math.min(dist_D - 0.8, planeIntersect.x));
+        pos_x = Math.max(10.0, Math.min(dist_D - 0.8, planeIntersect.x));
         updateSimulation();
       }
     });
@@ -1154,19 +1355,29 @@
       }
     });
 
-    // Header View Buttons (Toggle Hemispheres & Cables)
-    const btnHemi = document.getElementById("hdr-btn-hemi");
-    btnHemi.addEventListener("click", () => {
-      showHemispheres = !showHemispheres;
-      btnHemi.classList.toggle("active", showHemispheres);
-      hemiGroup.visible = showHemispheres;
-    });
-
+    // Header View Buttons (Cables & Camera Presets)
     const btnWires = document.getElementById("hdr-btn-wires");
     btnWires.addEventListener("click", () => {
       showCables = !showCables;
       btnWires.classList.toggle("active", showCables);
       updateCables();
+    });
+
+    const btnCamField = document.getElementById("hdr-btn-cam-field");
+    const btnCamHouse = document.getElementById("hdr-btn-cam-house");
+
+    btnCamField.addEventListener("click", () => {
+      btnCamField.classList.add("active");
+      btnCamHouse.classList.remove("active");
+      camera.position.set(22, 18, 38);
+      controls.target.set(20, 0, 0);
+    });
+
+    btnCamHouse.addEventListener("click", () => {
+      btnCamHouse.classList.add("active");
+      btnCamField.classList.remove("active");
+      camera.position.set(-1.0, 3.2, 3.6);
+      controls.target.set(-4.0, 1.8, -2.6);
     });
 
     // =========================================================================
@@ -1190,27 +1401,28 @@
         "FALL OF POTENTIAL EARTH TESTING (3-POLE)" :
         "PENGUJIAN TAHANAN PENTANAHAN FALL OF POTENTIAL";
 
-      document.getElementById("hdr-btn-hemi").textContent = isEn ? "Potential Bowls (Hemispheres)" : "Bola Potensial (Hemispheres)";
       document.getElementById("hdr-btn-wires").textContent = isEn ? "Test Leads / Cables" : "Kabel Alat Uji";
+      document.getElementById("hdr-btn-cam-field").textContent = isEn ? "🔭 Full Field View" : "🔭 Lapangan Lengkap";
+      document.getElementById("hdr-btn-cam-house").textContent = isEn ? "🏠 House & Test Box" : "🏠 Gedung & Kotak Uji";
 
       document.getElementById("txt-curve-title").textContent = isEn ? "Fall of Potential Curve R(x)" : "Kurva Fall of Potential R(x)";
       document.getElementById("svg-txt-plateau").textContent = isEn ? "61.8% Plateau Zone" : "Zona Datar 61.8%";
 
       document.getElementById("txt-tester-title").textContent = isEn ? "3-POLE DIGITAL EARTH TESTER" : "EARTH TESTER DIGITAL 3-TITIK";
-      document.getElementById("lbl-diag-pos").textContent = isEn ? "Potential Probe P Position:" : "Posisi Pasak Potensial P:";
-      document.getElementById("lbl-diag-true").textContent = isEn ? "True Earth Resistance R_E:" : "Tahanan Pentanahan Sejati R_E:";
-      document.getElementById("lbl-diag-plat").textContent = isEn ? "Plateau Flatness (52-72%):" : "Kemiringan Zona Datar (52-72%):";
+      document.getElementById("lbl-diag-pos").textContent = isEn ? "Potential Electrode Position P:" : "Posisi Elektroda Potensial P:";
+      document.getElementById("lbl-diag-true").textContent = isEn ? "Resistance:" : "Resistansi:";
       document.getElementById("lbl-diag-soil").textContent = isEn ? "Soil Resistivity (ρ):" : "Resistivitas Tanah (ρ):";
 
       document.getElementById("txt-hint").textContent = isEn ?
-        "Drag Probe P (Yellow stake) on the 3D ground or use slider | Left Click: Orbit | Scroll: Zoom" :
-        "Tarik Pasak P (Kuning) di atas tanah 3D atau geser slider | Klik Kiri: Putar Kamera | Scroll: Zoom";
+        "Drag Potential Electrode P (Yellow) on 3D ground or use slider | Left Click: Orbit | Scroll: Zoom" :
+        "Tarik Elektroda P (Kuning) di atas tanah 3D atau geser slider | Klik Kiri: Putar Kamera | Scroll: Zoom";
 
-      document.getElementById("lbl-slider-p").textContent = isEn ? "Potential Probe P Position (x from E)" : "Posisi Pasak Potensial P (x dari E)";
-      document.getElementById("lbl-slider-d").textContent = isEn ? "Current Spike C Distance (D)" : "Jarak Pasak Arus C (D)";
+      document.getElementById("lbl-slider-p").textContent = isEn ? "Potential Electrode Position P (x from E)" : "Posisi Elektroda Potensial P (x dari E)";
+      document.getElementById("lbl-slider-d").textContent = isEn ? "Current Electrode Distance C (D)" : "Jarak Elektroda Current C (D)";
       document.getElementById("lbl-quick").textContent = isEn ? "Quick Jump:" : "Lompat Cepat:";
       document.getElementById("lbl-soil-select").textContent = isEn ? "Soil Stratification:" : "Karakteristik Tanah:";
 
+      updateBadgeLabels();
       updateSimulation();
     }
 
@@ -1227,6 +1439,7 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
+    updateBadgeLabels();
     updateSimulation();
     animate();
   </script>
