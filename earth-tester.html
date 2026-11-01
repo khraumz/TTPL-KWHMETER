@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Virtual Earth Tester 3D - Fall of Potential Method (TTPL FTUI)</title>
+  <title>Virtual Earth Tester 3D - FoP Method (TTPL FTUI)</title>
   <style>
     /* ==========================================================================
        STANDAR GAYA & TEMA TTPL:
@@ -24,26 +24,27 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background: #f8fafc;
       color: #000000;
-      overflow: hidden;
-      width: 100vw;
-      height: 100vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
     }
 
-    #canvas-container {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 1;
+    /* Main Container for EMAS 3 / Moodle Dashboard */
+    .emas-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 14px 16px 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-sizing: border-box;
     }
 
     /* Global Navigation Bar & Mode Switcher (Matching TTPL Header) */
     .header-bar {
-      position: absolute;
-      top: 14px;
-      left: 20px;
-      right: 20px;
+      position: relative;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
@@ -55,17 +56,17 @@
       box-shadow: 0 4px 20px rgba(0,0,0,0.04);
       border: 1px solid rgba(0,0,0,0.06);
       box-sizing: border-box;
-      z-index: 10;
+      width: 100%;
     }
 
     .pill-badge {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      font-size: 15pt;
+      font-size: 14pt;
       font-weight: bold;
       letter-spacing: -0.02em;
       color: #0f2744;
       background: linear-gradient(135deg, #dbeafe 0%, #ccfbf1 50%, #fef9c3 100%);
-      padding: 7px 20px 7px 14px;
+      padding: 7px 18px 7px 14px;
       border-radius: 9999px;
       display: inline-flex !important;
       align-items: center !important;
@@ -78,10 +79,10 @@
     }
 
     .pill-svg {
-      width: 34px !important;
+      width: 32px !important;
       height: 18px !important;
-      min-width: 34px !important;
-      max-width: 34px !important;
+      min-width: 32px !important;
+      max-width: 32px !important;
       min-height: 18px !important;
       max-height: 18px !important;
       display: inline-block !important;
@@ -149,186 +150,102 @@
       font-size: 0.7rem;
     }
 
-    /* Right Instrument Panel: Digital Earth Tester LCD & Diagnostics */
-    .instrument-card {
-      position: absolute;
-      top: 86px;
-      right: 20px;
-      width: 340px;
-      background: #ffffff;
-      border-radius: 16px;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
-      padding: 16px 18px;
-      z-index: 10;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+    /* Dashboard Grid (2-Column Desktop, 1-Column Mobile/Iframe) */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 370px;
+      gap: 14px;
+      align-items: start;
+      width: 100%;
     }
 
-    .instrument-top-accent {
+    @media (max-width: 1080px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .col-main {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .col-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+      min-width: 0;
+    }
+
+    /* 3D Viewport Card */
+    .viewport-card {
+      position: relative;
+      width: 100%;
+      height: 520px;
+      min-height: 420px;
+      background: #f8fafc;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    .viewport-card:fullscreen {
+      width: 100vw;
+      height: 100vh;
+      border-radius: 0;
+      border: none;
+    }
+
+    #canvas-container {
+      width: 100%;
+      height: 100%;
       position: absolute;
       top: 0;
       left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, #9ADD67 0%, #FFF100 50%, #004FBD 100%);
     }
 
-    .card-title-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 4px;
-    }
-
-    .card-title-row h3 {
-      font-size: 13.5px;
-      font-weight: 900;
-      color: #0f2744;
-      margin: 0;
-    }
-
-    /* Digital Display Box (White with 3D Shadow) */
-    .lcd-display {
-      background: #ffffff;
-      border-radius: 14px;
-      padding: 16px 14px;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 10px 25px -4px rgba(14, 165, 233, 0.18), 0 4px 10px -2px rgba(15, 23, 42, 0.05), inset 0 1px 2px #ffffff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .lcd-resistance {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      font-size: 38px;
-      font-weight: 900;
-      color: #004FBD;
-      letter-spacing: -0.5px;
-      line-height: 1.1;
-      text-shadow: 0 1px 2px rgba(0, 79, 189, 0.15);
-    }
-
-    /* Status Badge */
-    .status-badge {
-      padding: 5px 10px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 800;
-      text-align: center;
-      color: #ffffff;
-      background: #059669;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      transition: background 0.2s;
-    }
-
-    /* Plateau Flatness Diagnostic Box */
-    .diag-box {
-      background: #f8fafc;
-      border-radius: 10px;
-      padding: 10px 12px;
-      border: 1px solid #e2e8f0;
-      font-size: 11.5px;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .diag-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-    }
-
-    .diag-label {
-      color: #64748b;
-      font-weight: 700;
-      font-size: 11px;
-    }
-
-    .diag-val {
-      color: #000000;
-      font-weight: 800;
-    }
-
-    /* Fall of Potential Real-time Curve HUD (Top Left Overlay) */
-    .curve-card {
-      position: absolute;
-      top: 86px;
-      left: 20px;
-      width: 360px;
-      background: #ffffff;
-      border-radius: 16px;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
-      padding: 14px 16px;
-      z-index: 10;
-      overflow: hidden;
-    }
-
-    .curve-title-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 8px;
-    }
-
-    .curve-title-row span.title {
-      font-size: 12.5px;
-      font-weight: 900;
-      color: #0f2744;
-    }
-
-    .curve-svg-box {
-      position: relative;
-      width: 100%;
-      height: 145px;
-      background: #ffffff;
-      border-radius: 8px;
-      border: 1px solid #e2e8f0;
-      overflow: hidden;
-    }
-
-    /* Interaction Hint */
+    /* Interaction Hint Inside Viewport */
     .interaction-hint {
       position: absolute;
-      bottom: 155px;
+      bottom: 12px;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 700;
       color: #0f2744;
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(4px);
       border: 1px solid #cbd5e1;
-      padding: 6px 18px;
+      padding: 6px 16px;
       border-radius: 20px;
       box-shadow: 0 4px 14px rgba(0,0,0,0.06);
       pointer-events: none;
       z-index: 10;
       white-space: nowrap;
+      max-width: 92%;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      text-align: center;
     }
 
-    /* Bottom Control Bar */
-    .control-panel {
-      position: absolute;
-      bottom: 18px;
-      left: 50%;
-      transform: translateX(-50%);
+    /* Control Panel Card */
+    .control-card {
       background: #ffffff;
-      border-radius: 18px;
+      border-radius: 16px;
       border: 1px solid #e2e8f0;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-      padding: 12px 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      padding: 14px 18px;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      z-index: 10;
-      width: 90%;
-      max-width: 820px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .control-row-sliders {
@@ -337,11 +254,19 @@
       gap: 16px;
     }
 
+    @media (max-width: 680px) {
+      .control-row-sliders {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+
     .slider-item {
       flex: 1;
       display: flex;
       flex-direction: column;
       gap: 3px;
+      width: 100%;
     }
 
     .slider-header {
@@ -421,6 +346,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      flex-wrap: wrap;
     }
 
     .btn-quick {
@@ -460,165 +386,305 @@
       cursor: pointer;
     }
 
-    /* Responsive */
-    @media (max-width: 860px) {
-      .curve-card { display: none; }
-      .instrument-card { width: calc(100% - 40px); left: 20px; top: auto; bottom: 150px; }
-      .control-panel { width: calc(100% - 40px); padding: 10px 14px; }
-      .control-row-sliders { flex-direction: column; gap: 8px; }
-      .interaction-hint { display: none; }
+    /* Right Sidebar Cards */
+    .instrument-card {
+      position: relative;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      padding: 16px 18px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-sizing: border-box;
+    }
+
+    .instrument-top-accent {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #9ADD67 0%, #FFF100 50%, #004FBD 100%);
+    }
+
+    .card-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .card-title-row h3 {
+      font-size: 13.5px;
+      font-weight: 900;
+      color: #0f2744;
+      margin: 0;
+    }
+
+    .lcd-display {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 16px 14px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 10px 25px -4px rgba(14, 165, 233, 0.18), 0 4px 10px -2px rgba(15, 23, 42, 0.05), inset 0 1px 2px #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lcd-resistance {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 38px;
+      font-weight: 900;
+      color: #004FBD;
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+      text-shadow: 0 1px 2px rgba(0, 79, 189, 0.15);
+    }
+
+    .diag-box {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 10px 12px;
+      border: 1px solid #e2e8f0;
+      font-size: 11.5px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .diag-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .diag-label {
+      color: #64748b;
+      font-weight: 700;
+      font-size: 11px;
+    }
+
+    .diag-val {
+      color: #000000;
+      font-weight: 800;
+    }
+
+    .curve-card {
+      position: relative;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      padding: 14px 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-sizing: border-box;
+    }
+
+    .curve-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .curve-title-row span.title {
+      font-size: 12.5px;
+      font-weight: 900;
+      color: #0f2744;
+    }
+
+    .curve-svg-box {
+      position: relative;
+      width: 100%;
+      height: 145px;
+      background: #ffffff;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
     }
   </style>
 </head>
 <body>
 
-  <!-- 3D WebGL Canvas Viewport -->
-  <div id="canvas-container"></div>
+  <div class="emas-container">
 
-  <!-- Global Header Bar (TTPL Design Standard) -->
-  <div class="header-bar">
-    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-      <div class="pill-badge">
-        <svg class="pill-svg">
-          <path d="M -32 9 Q -28 -2 -24 9 T -16 9 T -8 9 T 0 9 T 8 9 T 16 9 T 24 9 T 32 9 T 40 9 T 48 9 T 56 9 T 64 9"
-            fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round">
-            <animateTransform attributeName="transform" type="translate" from="0,0" to="-16,0" dur="1s" repeatCount="indefinite" />
-          </path>
-        </svg>
-        <span id="nav-badge-title">PENGUJIAN RESISTANSI PENTANAHAN FALL OF POTENTIAL</span>
-      </div>
-    </div>
-
-    <!-- View Switcher & Language Toggle -->
-    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
-      <div class="hdr-tabs-container">
-        <button id="hdr-btn-wires" class="hdr-nav-btn active" type="button">Kabel Alat Uji</button>
-        <button id="hdr-btn-mode-pan" class="hdr-nav-btn" type="button" title="Mode Geser Layar / Pan Screen">✋ Geser Layar</button>
-        <button id="hdr-btn-cam-field" class="hdr-nav-btn active" type="button">🔭 Lapangan Lengkap</button>
-        <button id="hdr-btn-cam-house" class="hdr-nav-btn" type="button">🏠 Gedung &amp; Kotak Uji</button>
-      </div>
-
-      <button id="hdr-btn-lang" class="hdr-lang-btn" type="button" title="Ganti Bahasa / Switch Language">
-        <span id="lang-tag-id" class="lang-active-tag">ID</span>
-        <span>/</span>
-        <span id="lang-tag-en">EN</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Fall-of-Potential Theoretical & Live S-Curve (Top Left HUD) -->
-  <div class="curve-card" id="curve-card">
-    <div class="curve-title-row">
-      <span class="title" id="txt-curve-title">Kurva Fall of Potential R(x)</span>
-      <span style="font-size: 10.5px; font-weight: 800; color: #004FBD;" id="txt-curve-sub">IEEE Std 81</span>
-    </div>
-    <div class="curve-svg-box">
-      <svg id="svg-fop-curve" width="100%" height="100%" viewBox="0 0 330 145" preserveAspectRatio="none">
-        <!-- 52% - 72% Flat Plateau Shaded Zone -->
-        <rect id="svg-plateau-zone" x="171" y="8" width="66" height="114" fill="rgba(154, 221, 103, 0.28)" stroke="#84cc16" stroke-width="1" stroke-dasharray="3,2"></rect>
-        <text id="svg-txt-plateau" x="204" y="19" text-anchor="middle" font-size="7.5" font-weight="800" fill="#0f2744">Zona Datar 61.8%</text>
-
-        <!-- True Ground Resistance Reference Line (Horiz) -->
-        <line id="svg-line-rtrue" x1="15" y1="65" x2="315" y2="65" stroke="#004FBD" stroke-width="1.2" stroke-dasharray="4,3"></line>
-        <text id="svg-txt-rtrue" x="18" y="60" font-size="8" font-weight="800" fill="#004FBD">R_true = 2.92 Ω</text>
-
-        <!-- 61.8% Vertical Rule Line -->
-        <line id="svg-line-618" x1="204" y1="8" x2="204" y2="124" stroke="#059669" stroke-width="1.4" stroke-dasharray="2,2"></line>
-
-        <!-- Axis Lines -->
-        <line x1="20" y1="124" x2="315" y2="124" stroke="#cbd5e1" stroke-width="1.2"></line>
-        <line x1="20" y1="8" x2="20" y2="124" stroke="#cbd5e1" stroke-width="1.2"></line>
-        <text x="315" y="136" text-anchor="end" font-size="7.5" font-weight="700" fill="#64748b">Jarak x (m)</text>
-        <text x="20" y="136" text-anchor="start" font-size="7.5" font-weight="700" fill="#64748b">0 (E)</text>
-
-        <!-- Theoretical S-Curve Path -->
-        <path id="svg-path-scurve" d="" fill="none" stroke="#004FBD" stroke-width="2.4" stroke-linecap="round"></path>
-
-        <!-- Live Probe Marker Point -->
-        <circle id="svg-marker-live" cx="204" cy="65" r="5" fill="#FFF100" stroke="#000000" stroke-width="2"></circle>
-      </svg>
-    </div>
-  </div>
-
-  <!-- Right Instrument Panel (Earth Tester LCD & Compliance) -->
-  <div class="info-card instrument-card" id="instrument-card">
-    <div class="instrument-top-accent"></div>
-    <div class="card-title-row">
-      <h3 id="txt-tester-title">EARTH TESTER DIGITAL 3-TITIK</h3>
-      <span style="font-size: 10px; font-weight: 800; background: rgba(0, 79, 189, 0.08); color: #004FBD; padding: 2px 6px; border-radius: 4px;">128 Hz AC</span>
-    </div>
-
-    <!-- Display Box -->
-    <div class="lcd-display">
-      <div class="lcd-resistance" id="lcd-val-r">2.92 Ω</div>
-    </div>
-
-    <!-- Real-time Diagnostics -->
-    <div class="diag-box">
-      <div class="diag-row">
-        <span class="diag-label" id="lbl-diag-pos">Posisi Elektroda Potensial P:</span>
-        <span class="diag-val" id="diag-val-pos">x = 24.7 m (61.8% D)</span>
-      </div>
-      <div class="diag-row">
-        <span class="diag-label" id="lbl-diag-true">Resistansi:</span>
-        <span class="diag-val" id="diag-val-true">2.92 Ω</span>
-      </div>
-      <div class="diag-row">
-        <span class="diag-label" id="lbl-diag-soil">Resistivitas Tanah (ρ):</span>
-        <span class="diag-val" id="diag-val-rho">85 Ω·m</span>
-      </div>
-      <div class="diag-row">
-        <span class="diag-label" id="lbl-diag-grid">Sistem Pentanahan:</span>
-        <span class="diag-val" id="diag-val-grid" style="color: #059669; font-size: 11px;">Grid Multi-Rod &amp; GEM</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Interaction Hint -->
-  <div class="interaction-hint" id="txt-hint">Tarik Elektroda P (Kuning) di atas tanah 3D atau geser slider | Klik Kiri: Putar Kamera | Klik Kanan / Tombol Geser: Pindahkan Layar | Scroll: Zoom</div>
-
-  <!-- Bottom Control Panel -->
-  <div class="control-panel">
-    <div class="control-row-sliders">
-      <!-- Potential Probe Distance x Slider -->
-      <div class="slider-item">
-        <div class="slider-header">
-          <span id="lbl-slider-p">Posisi Elektroda Potensial P (x dari E)</span>
-          <span class="val-tag tag-yellow" id="tag-probe-val">x = 24.7 m (61.8% D)</span>
+    <!-- Global Header Bar (TTPL Design Standard) -->
+    <header class="header-bar">
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <div class="pill-badge">
+          <svg class="pill-svg">
+            <path d="M -32 9 Q -28 -2 -24 9 T -16 9 T -8 9 T 0 9 T 8 9 T 16 9 T 24 9 T 32 9 T 40 9 T 48 9 T 56 9 T 64 9"
+              fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round">
+              <animateTransform attributeName="transform" type="translate" from="0,0" to="-16,0" dur="1s" repeatCount="indefinite" />
+            </path>
+          </svg>
+          <span id="nav-badge-title">PENGUJIAN RESISTANSI PENTANAHAN FoP</span>
         </div>
-        <input type="range" class="slider-probe" id="range-probe-x" min="1" max="39" step="0.2" value="24.7">
       </div>
 
-      <!-- Current Probe Distance D Slider -->
-      <div class="slider-item">
-        <div class="slider-header">
-          <span id="lbl-slider-d">Jarak Elektroda Current C (D)</span>
-          <span class="val-tag tag-blue" id="tag-current-val">D = 40.0 m</span>
+      <!-- View Switcher, Pan, Presets, Fullscreen & Language Toggle -->
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+        <div class="hdr-tabs-container">
+          <button id="hdr-btn-wires" class="hdr-nav-btn active" type="button">Kabel Alat Uji</button>
+          <button id="hdr-btn-mode-pan" class="hdr-nav-btn" type="button" title="Mode Geser Layar / Pan Screen">✋ Geser Layar</button>
+          <button id="hdr-btn-cam-field" class="hdr-nav-btn active" type="button">🔭 Lapangan Lengkap</button>
+          <button id="hdr-btn-cam-house" class="hdr-nav-btn" type="button">🏠 Gedung &amp; Kotak Uji</button>
+          <button id="hdr-btn-fullscreen" class="hdr-nav-btn" type="button" title="Layar Penuh / Fullscreen">⛶ Layar Penuh</button>
         </div>
-        <input type="range" class="slider-dist" id="range-dist-d" min="10" max="80" step="1" value="40">
-      </div>
-    </div>
 
-    <!-- Quick Jump Buttons & Soil Preset -->
-    <div class="action-row">
-      <div class="quick-jump-group">
-        <span style="font-size: 11px; font-weight: 800; color: #64748b;" id="lbl-quick">Lompat Cepat:</span>
-        <button class="btn-quick" id="btn-p52" type="button">52%</button>
-        <button class="btn-quick target-618" id="btn-p618" type="button">61.8% (Golden)</button>
-        <button class="btn-quick" id="btn-p72" type="button">72%</button>
+        <button id="hdr-btn-lang" class="hdr-lang-btn" type="button" title="Ganti Bahasa / Switch Language">
+          <span id="lang-tag-id" class="lang-active-tag">ID</span>
+          <span>/</span>
+          <span id="lang-tag-en">EN</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Dashboard Grid (EMAS 3 Responsive Flow) -->
+    <main class="dashboard-grid">
+
+      <!-- Left Column: 3D Viewport & Control Panel -->
+      <div class="col-main">
+
+        <!-- 3D WebGL Canvas Viewport Card -->
+        <div class="viewport-card" id="viewport-card">
+          <div id="canvas-container"></div>
+          <!-- Interaction Hint Pill inside Viewport -->
+          <div class="interaction-hint" id="txt-hint">
+            Tarik Elektroda P (Kuning) di atas tanah 3D atau geser slider | Klik Kiri: Putar Kamera | Klik Kanan / Tombol Geser: Pindahkan Layar | Scroll: Zoom
+          </div>
+        </div>
+
+        <!-- Interactive Control Panel Card -->
+        <div class="control-card" id="control-card">
+          <div class="control-row-sliders">
+            <!-- Potential Electrode Distance x Slider -->
+            <div class="slider-item">
+              <div class="slider-header">
+                <span id="lbl-slider-p">Posisi Elektroda Potensial P (x dari E)</span>
+                <span class="val-tag tag-yellow" id="tag-probe-val">x = 24.7 m (61.8% D)</span>
+              </div>
+              <input type="range" class="slider-probe" id="range-probe-x" min="1" max="39" step="0.2" value="24.7">
+            </div>
+
+            <!-- Current Electrode Distance D Slider -->
+            <div class="slider-item">
+              <div class="slider-header">
+                <span id="lbl-slider-d">Jarak Elektroda Current C (D)</span>
+                <span class="val-tag tag-blue" id="tag-current-val">D = 40.0 m</span>
+              </div>
+              <input type="range" class="slider-dist" id="range-dist-d" min="10" max="80" step="1" value="40">
+            </div>
+          </div>
+
+          <!-- Quick Jump Buttons & Soil Preset -->
+          <div class="action-row">
+            <div class="quick-jump-group">
+              <span style="font-size: 11px; font-weight: 800; color: #64748b;" id="lbl-quick">Lompat Cepat:</span>
+              <button class="btn-quick" id="btn-p52" type="button">52%</button>
+              <button class="btn-quick target-618" id="btn-p618" type="button">61.8% (Golden)</button>
+              <button class="btn-quick" id="btn-p72" type="button">72%</button>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <span style="font-size: 11px; font-weight: 800; color: #64748b;" id="lbl-soil-select">Karakteristik Tanah:</span>
+              <select class="dropdown-soil" id="select-soil">
+                <option value="25">1. Tanah Rawa / Liat Basah (ρ = 25 Ω·m)</option>
+                <option value="85" selected>2. Tanah Lembap - UI Depok (ρ = 85 Ω·m)</option>
+                <option value="250">3. Pasir Lembap (ρ = 250 Ω·m)</option>
+                <option value="650">4. Pasir Kering &amp; Kerikil (ρ = 650 Ω·m)</option>
+                <option value="1500">5. Tanah Berbatu / Padas (ρ = 1500 Ω·m)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 11px; font-weight: 800; color: #64748b;" id="lbl-soil-select">Karakteristik Tanah:</span>
-        <select class="dropdown-soil" id="select-soil">
-          <option value="25">1. Tanah Rawa / Liat Basah (ρ = 25 Ω·m)</option>
-          <option value="85" selected>2. Tanah Lembap - UI Depok (ρ = 85 Ω·m)</option>
-          <option value="250">3. Pasir Lembap (ρ = 250 Ω·m)</option>
-          <option value="650">4. Pasir Kering & Kerikil (ρ = 650 Ω·m)</option>
-          <option value="1500">5. Tanah Berbatu / Padas (ρ = 1500 Ω·m)</option>
-        </select>
+      <!-- Right Column: Digital Instrument & Live FoP Curve -->
+      <div class="col-sidebar">
+
+        <!-- Right Instrument Panel (Earth Tester LCD & Diagnostics) -->
+        <div class="instrument-card" id="instrument-card">
+          <div class="instrument-top-accent"></div>
+          <div class="card-title-row">
+            <h3 id="txt-tester-title">EARTH TESTER DIGITAL 3-TITIK</h3>
+            <span style="font-size: 10px; font-weight: 800; background: rgba(0, 79, 189, 0.08); color: #004FBD; padding: 2px 6px; border-radius: 4px;">128 Hz AC</span>
+          </div>
+
+          <!-- Display Box -->
+          <div class="lcd-display">
+            <div class="lcd-resistance" id="lcd-val-r">2.92 Ω</div>
+          </div>
+
+          <!-- Real-time Diagnostics -->
+          <div class="diag-box">
+            <div class="diag-row">
+              <span class="diag-label" id="lbl-diag-pos">Posisi Elektroda Potensial P:</span>
+              <span class="diag-val" id="diag-val-pos">x = 24.7 m (61.8% D)</span>
+            </div>
+            <div class="diag-row">
+              <span class="diag-label" id="lbl-diag-true">Resistansi:</span>
+              <span class="diag-val" id="diag-val-true">2.92 Ω</span>
+            </div>
+            <div class="diag-row">
+              <span class="diag-label" id="lbl-diag-soil">Resistivitas Tanah (ρ):</span>
+              <span class="diag-val" id="diag-val-rho">85 Ω·m</span>
+            </div>
+            <div class="diag-row">
+              <span class="diag-label" id="lbl-diag-grid">Sistem Pentanahan:</span>
+              <span class="diag-val" id="diag-val-grid" style="color: #059669; font-size: 11px;">Grid Multi-Rod &amp; GEM</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fall-of-Potential Theoretical & Live S-Curve Card -->
+        <div class="curve-card" id="curve-card">
+          <div class="curve-title-row">
+            <span class="title" id="txt-curve-title">Kurva FoP R(x)</span>
+            <span style="font-size: 10.5px; font-weight: 800; color: #004FBD;" id="txt-curve-sub">IEEE Std 81</span>
+          </div>
+          <div class="curve-svg-box">
+            <svg id="svg-fop-curve" width="100%" height="100%" viewBox="0 0 330 145" preserveAspectRatio="none">
+              <!-- 52% - 72% Flat Plateau Shaded Zone -->
+              <rect id="svg-plateau-zone" x="171" y="8" width="66" height="114" fill="rgba(154, 221, 103, 0.28)" stroke="#84cc16" stroke-width="1" stroke-dasharray="3,2"></rect>
+              <text id="svg-txt-plateau" x="204" y="19" text-anchor="middle" font-size="7.5" font-weight="800" fill="#0f2744">Zona Datar 61.8%</text>
+
+              <!-- True Ground Resistance Reference Line (Horiz) -->
+              <line id="svg-line-rtrue" x1="15" y1="65" x2="315" y2="65" stroke="#004FBD" stroke-width="1.2" stroke-dasharray="4,3"></line>
+              <text id="svg-txt-rtrue" x="18" y="60" font-size="8" font-weight="800" fill="#004FBD">R_true = 2.92 Ω</text>
+
+              <!-- 61.8% Vertical Rule Line -->
+              <line id="svg-line-618" x1="204" y1="8" x2="204" y2="124" stroke="#059669" stroke-width="1.4" stroke-dasharray="2,2"></line>
+
+              <!-- Axis Lines -->
+              <line x1="20" y1="124" x2="315" y2="124" stroke="#cbd5e1" stroke-width="1.2"></line>
+              <line x1="20" y1="8" x2="20" y2="124" stroke="#cbd5e1" stroke-width="1.2"></line>
+              <text x="315" y="136" text-anchor="end" font-size="7.5" font-weight="700" fill="#64748b">Jarak x (m)</text>
+              <text x="20" y="136" text-anchor="start" font-size="7.5" font-weight="700" fill="#64748b">0 (E)</text>
+
+              <!-- Theoretical S-Curve Path -->
+              <path id="svg-path-scurve" d="" fill="none" stroke="#004FBD" stroke-width="2.4" stroke-linecap="round"></path>
+
+              <!-- Live Probe Marker Point -->
+              <circle id="svg-marker-live" cx="204" cy="65" r="5" fill="#FFF100" stroke="#000000" stroke-width="2"></circle>
+            </svg>
+          </div>
+        </div>
+
       </div>
-    </div>
+
+    </main>
+
   </div>
 
   <!-- Three.js Libraries -->
@@ -684,11 +750,18 @@
     scene.background = new THREE.Color(0xf8fafc);
     scene.fog = new THREE.FogExp2(0xf8fafc, 0.0035);
 
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+    function getViewportSize() {
+      const w = container.clientWidth || 800;
+      const h = container.clientHeight || 520;
+      return { w, h };
+    }
+    const initialSize = getViewportSize();
+
+    const camera = new THREE.PerspectiveCamera(45, initialSize.w / initialSize.h, 1, 1000);
     camera.position.set(22, 18, 38);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(initialSize.w, initialSize.h);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -1415,14 +1488,22 @@
     const planeGround = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
     const planeIntersect = new THREE.Vector3();
 
+    function updatePointerPos(e) {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    }
+
     window.addEventListener("pointerdown", (e) => {
-      if (e.target.closest(".header-bar") || e.target.closest(".curve-card") || e.target.closest(".instrument-card") || e.target.closest(".control-panel")) {
+      if (e.target.closest(".header-bar") || e.target.closest(".curve-card") || e.target.closest(".instrument-card") || e.target.closest(".control-card")) {
+        return;
+      }
+      const rect = renderer.domElement.getBoundingClientRect();
+      if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) {
         return;
       }
 
-      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-
+      updatePointerPos(e);
       raycaster.setFromCamera(mouse, camera);
       const hits = raycaster.intersectObjects(stakeP_Group.children, true);
       if (hits.length > 0) {
@@ -1434,9 +1515,7 @@
 
     window.addEventListener("pointermove", (e) => {
       if (!isDraggingProbe) return;
-      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-
+      updatePointerPos(e);
       raycaster.setFromCamera(mouse, camera);
       if (raycaster.ray.intersectPlane(planeGround, planeIntersect)) {
         pos_x = Math.max(0.5, Math.min(dist_D - 0.8, planeIntersect.x));
@@ -1452,7 +1531,7 @@
       }
     });
 
-    // Header View Buttons (Cables & Camera Presets)
+    // Header View Buttons (Cables, Fullscreen & Camera Presets)
     const btnWires = document.getElementById("hdr-btn-wires");
     btnWires.addEventListener("click", () => {
       showCables = !showCables;
@@ -1477,6 +1556,29 @@
       controls.target.set(-4.0, 1.8, -2.6);
     });
 
+    const btnFullscreen = document.getElementById("hdr-btn-fullscreen");
+    const viewportCard = document.getElementById("viewport-card");
+    if (btnFullscreen && viewportCard) {
+      btnFullscreen.addEventListener("click", () => {
+        if (!document.fullscreenElement) {
+          if (viewportCard.requestFullscreen) {
+            viewportCard.requestFullscreen();
+          } else if (viewportCard.webkitRequestFullscreen) {
+            viewportCard.webkitRequestFullscreen();
+          }
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          }
+        }
+      });
+      document.addEventListener("fullscreenchange", () => {
+        const isFs = !!document.fullscreenElement;
+        btnFullscreen.classList.toggle("active", isFs);
+        setTimeout(handleResize, 80);
+      });
+    }
+
     // =========================================================================
     // 7. BILINGUAL LANGUAGE SWITCHER (ID / EN)
     // =========================================================================
@@ -1495,8 +1597,8 @@
       tagEn.className = isEn ? "lang-active-tag" : "";
 
       document.getElementById("nav-badge-title").textContent = isEn ?
-        "FALL OF POTENTIAL EARTH TESTING (3-POLE)" :
-        "PENGUJIAN RESISTANSI PENTANAHAN FALL OF POTENTIAL";
+        "FoP EARTH RESISTANCE TESTING (3-POLE)" :
+        "PENGUJIAN RESISTANSI PENTANAHAN FoP";
 
       document.getElementById("hdr-btn-wires").textContent = isEn ? "Test Leads / Cables" : "Kabel Alat Uji";
       if (document.getElementById("hdr-btn-mode-pan")) {
@@ -1504,8 +1606,11 @@
       }
       document.getElementById("hdr-btn-cam-field").textContent = isEn ? "🔭 Full Field View" : "🔭 Lapangan Lengkap";
       document.getElementById("hdr-btn-cam-house").textContent = isEn ? "🏠 House & Test Box" : "🏠 Gedung & Kotak Uji";
+      if (document.getElementById("hdr-btn-fullscreen")) {
+        document.getElementById("hdr-btn-fullscreen").textContent = isEn ? "⛶ Fullscreen" : "⛶ Layar Penuh";
+      }
 
-      document.getElementById("txt-curve-title").textContent = isEn ? "Fall of Potential Curve R(x)" : "Kurva Fall of Potential R(x)";
+      document.getElementById("txt-curve-title").textContent = isEn ? "FoP Curve R(x)" : "Kurva FoP R(x)";
       document.getElementById("svg-txt-plateau").textContent = isEn ? "61.8% Plateau Zone" : "Zona Datar 61.8%";
 
       document.getElementById("txt-tester-title").textContent = isEn ? "3-POLE DIGITAL EARTH TESTER" : "EARTH TESTER DIGITAL 3-TITIK";
@@ -1537,11 +1642,19 @@
       renderer.render(scene, camera);
     }
 
-    window.addEventListener("resize", () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
+    function handleResize() {
+      const size = getViewportSize();
+      if (size.w > 0 && size.h > 0) {
+        camera.aspect = size.w / size.h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(size.w, size.h);
+      }
+    }
+
+    window.addEventListener("resize", handleResize);
+    if (window.ResizeObserver) {
+      new ResizeObserver(handleResize).observe(container);
+    }
 
     updateBadgeLabels();
     updateSimulation();
