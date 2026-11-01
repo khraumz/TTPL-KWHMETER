@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Exploded View - Induction kWh Meter (Kilowatt-Hour Meter)</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    /* Top Navigation / Title */
+    .header {
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 3px 8px;
+      border-radius: 999px;
+      margin-bottom: 6px;
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.7);
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: #8b949e;
+      margin-top: 2px;
+    }
+
+    /* Control Panel (Bottom Center) */
+    .control-panel {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(22, 27, 34, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(240, 246, 252, 0.12);
+      border-radius: 16px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 10;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+      width: 90%;
+      max-width: 620px;
+    }
+
+    .slider-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      color: #c9d1d9;
+    }
+
+    .slider-header span.pct {
+      color: #38bdf8;
+      font-family: monospace;
+      font-size: 13px;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 4px;
+      background: #30363d;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #38bdf8;
+      box-shadow: 0 0 10px #38bdf8;
+      cursor: pointer;
+      border: 2px solid #ffffff;
+      transition: transform 0.1s;
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      background: #21262d;
+      border: 1px solid #30363d;
+      color: #c9d1d9;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      background: #30363d;
+      color: #ffffff;
+      border-color: #8b949e;
+    }
+
+    .btn.active {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #38bdf8;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+    }
+
+    /* Info Card (Top Right) */
+    .info-card {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      width: 310px;
+      background: rgba(22, 27, 34, 0.9);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(240, 246, 252, 0.12);
+      border-radius: 14px;
+      padding: 16px;
+      z-index: 10;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .info-card h3 {
+      font-size: 15px;
+      color: #38bdf8;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .info-card .tag {
+      font-size: 10px;
+      color: #a5f3fc;
+      background: rgba(6, 182, 212, 0.2);
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: normal;
+    }
+
+    .info-card p {
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: #8b949e;
+      margin-bottom: 10px;
+    }
+
+    .info-card .specs {
+      font-size: 11.5px;
+      background: rgba(13, 17, 23, 0.8);
+      border-radius: 8px;
+      padding: 8px 10px;
+      border: 1px solid #30363d;
+    }
+
+    .specs-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .specs-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .specs-label {
+      color: #6e7681;
+    }
+
+    .specs-val {
+      color: #e6edf3;
+      font-weight: 500;
+    }
+
+    /* Floating View Helper / Instructions */
+    .hint {
+      position: absolute;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: #6e7681;
+      pointer-events: none;
+      background: rgba(13, 17, 23, 0.6);
+      padding: 4px 12px;
+      border-radius: 20px;
+      backdrop-filter: blur(4px);
+    }
+
+    /* Parts Selector Toolbar (Left side) */
+    .parts-toolbar {
+      position: absolute;
+      top: 90px;
+      left: 20px;
+      background: rgba(22, 27, 34, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(240, 246, 252, 0.1);
+      border-radius: 12px;
+      padding: 10px;
+      max-height: 55vh;
+      overflow-y: auto;
+      z-index: 10;
+      width: 190px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .parts-toolbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .parts-toolbar::-webkit-scrollbar-thumb {
+      background: #30363d;
+      border-radius: 4px;
+    }
+
+    .parts-toolbar h4 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #8b949e;
+      margin-bottom: 8px;
+      padding-left: 4px;
+    }
+
+    .part-item {
+      font-size: 12px;
+      color: #c9d1d9;
+      padding: 6px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+
+    .part-item:hover {
+      background: #21262d;
+      color: #38bdf8;
+    }
+
+    .part-item.active {
+      background: rgba(56, 189, 248, 0.18);
+      color: #38bdf8;
+      font-weight: 600;
+    }
+
+    .part-color-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .parts-toolbar { display: none; }
+      .info-card { width: calc(100% - 40px); left: 20px; top: auto; bottom: 120px; }
+      .control-panel { flex-direction: column; gap: 10px; padding: 12px; }
+      .btn-group { width: 100%; justify-content: space-between; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="canvas-container"></div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="badge">Electromechanical Induction</div>
+    <div class="title">Single-Phase kWh Meter (Ferraris Meter)</div>
+    <div class="subtitle">Interactive 3D Exploded View & Component Anatomy</div>
+  </div>
+
+  <!-- Parts Quick Navigation (Left) -->
+  <div class="parts-toolbar">
+    <h4>Meter Assemblies</h4>
+    <div id="part-list-container"></div>
+  </div>
+
+  <!-- Component Info Card (Right) -->
+  <div class="info-card" id="info-card">
+    <h3 id="info-title">
+      <span id="info-name">Outer Glass Cover</span>
+      <span class="tag" id="info-tag">Enclosure</span>
+    </h3>
+    <p id="info-desc">Transparent impact-resistant polycarbonate dome that seals internal mechanisms from dust, moisture, and manual tampering while keeping the cyclometer readable.</p>
+    <div class="specs">
+      <div class="specs-row">
+        <span class="specs-label">Material:</span>
+        <span class="specs-val" id="info-material">Polycarbonate / Glass</span>
+      </div>
+      <div class="specs-row">
+        <span class="specs-label">Function:</span>
+        <span class="specs-val" id="info-func">Environmental Protection & Visibility</span>
+      </div>
+      <div class="specs-row">
+        <span class="specs-label">Key Spec:</span>
+        <span class="specs-val" id="info-spec">IP54 Dust/Water Ingress Rated</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hint">Left Click + Drag: Rotate | Right Click: Pan | Scroll: Zoom | Click any part to inspect</div>
+
+  <!-- Explode Controls (Bottom) -->
+  <div class="control-panel">
+    <div class="slider-group">
+      <div class="slider-header">
+        <span>Explosion Separation (Disassembly)</span>
+        <span class="pct" id="explode-pct">0%</span>
+      </div>
+      <input type="range" id="explode-slider" min="0" max="100" value="0">
+    </div>
+
+    <div class="btn-group">
+      <button class="btn" id="btn-animate">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        <span id="anim-text">Auto Explode</span>
+      </button>
+      <button class="btn" id="btn-xray">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/></svg>
+        X-Ray Cover
+      </button>
+      <button class="btn" id="btn-reset">Reset View</button>
+      <button class="btn" id="btn-export" title="Export this 3D model as .GLB file">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export GLB
+      </button>
+    </div>
+  </div>
+
+  <!-- CDN Three.js, OrbitControls, and GLTFExporter -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/GLTFExporter.js"></script>
+
+  <script>
+    // --- 1. COMPONENT DATA & METADATA ---
+    const COMPONENTS = [
+      {
+        id: "cover_front",
+        name: "Transparent Front Cover",
+        tag: "Enclosure",
+        desc: "Transparent high-impact polycarbonate dome that hermetically seals internal parts against weather, dust, and tampering while allowing direct reading of the register.",
+        material: "Polycarbonate / Glass",
+        function: "Environmental Seal & Visual Reading",
+        spec: "UV-Stabilized, IP54 Rating",
+        color: "#38bdf8",
+        explodeVec: { x: 0, y: 0, z: 120 }
+      },
+      {
+        id: "dial_plate",
+        name: "Dial Faceplate & Nameplate",
+        tag: "Register Subsystem",
+        desc: "Aluminum printed dial plate featuring the utility rating (220V, 5(20)A, 50Hz, 900 rev/kWh), calibration markings, anti-tamper serials, and window cutouts for the cyclometer drums.",
+        material: "Anodized Sheet Aluminum",
+        function: "Rating Display & Mechanism Concealment",
+        spec: "900 r/kWh Constant (Ck)",
+        color: "#f8fafc",
+        explodeVec: { x: 0, y: 15, z: 90 }
+      },
+      {
+        id: "cyclometer",
+        name: "Cyclometer Gear Register",
+        tag: "Counting Mechanism",
+        desc: "Mechanical 5-digit roller counter geared directly to the rotor shaft spindle. Decades count whole kWh in black drums with a red tenths-drum (0.1 kWh) geared at 10:1 ratio.",
+        material: "Delrin / Brass Pinions",
+        function: "Cumulative Energy Integration (kWh)",
+        spec: "5 Whole Digits + 1 Decimal Drum",
+        color: "#fbbf24",
+        explodeVec: { x: 0, y: 40, z: 65 }
+      },
+      {
+        id: "brake_magnet",
+        name: "Permanent Brake Magnet (C-Type)",
+        tag: "Braking System",
+        desc: "High-coercivity AlNiCo horseshoe permanent magnet straddling the spinning aluminum disc. Induces opposing eddy current drag proportional to rotational speed (braking torque Tb ∝ ω).",
+        material: "AlNiCo Permanent Magnet Alloy",
+        function: "Dynamic Braking & Steady-State Speed",
+        spec: "Braking Torque Tb = kd * Φm² * ω",
+        color: "#ef4444",
+        explodeVec: { x: -65, y: -5, z: 35 }
+      },
+      {
+        id: "rotor_disc",
+        name: "Aluminum Rotor Disc & Spindle",
+        tag: "Moving System",
+        desc: "Ultra-lightweight high-purity aluminum disc mounted on a vertical hardened steel shaft with a top worm gear. Includes anti-creep damping holes and a black stroboscopic marker.",
+        material: "Aluminum 99.5% + Hardened Steel",
+        function: "Drives Driving Torque from Eddy Fluxes",
+        spec: "Disc Dia: 92mm, Mass: ~28g",
+        color: "#94a3b8",
+        explodeVec: { x: 0, y: 0, z: 25 }
+      },
+      {
+        id: "bearings",
+        name: "Jewel Pivot & Guide Bearings",
+        tag: "Support Bearing",
+        desc: "Synthetic sapphire cup bearing at the bottom carrying the vertical disc spindle on a polished tungsten carbide spherical pivot, minimizing mechanical friction torque.",
+        material: "Synthetic Sapphire / Tungsten",
+        function: "Low-Friction Rotor Pivot",
+        spec: "Friction coeff μ < 0.002",
+        color: "#a855f7",
+        explodeVec: { x: 0, y: -45, z: 20 }
+      },
+      {
+        id: "voltage_coil",
+        name: "Voltage Element (Shunt Electromagnet)",
+        tag: "Driving System",
+        desc: "E-shaped silicon steel laminated core with thousands of turns of fine insulated copper wire connected across line voltage. Highly inductive to lag flux by 90° behind voltage.",
+        material: "Silicon Steel Core + 0.08mm Cu Wire",
+        function: "Produces Shunt Flux Φp ∝ Voltage V",
+        spec: "Nominal 220V AC, High Inductance",
+        color: "#d97706",
+        explodeVec: { x: 0, y: 35, z: -15 }
+      },
+      {
+        id: "current_coil",
+        name: "Current Element (Series Electromagnet)",
+        tag: "Driving System",
+        desc: "U-shaped laminated core wound with few turns of heavy-gauge copper wire connected in series with the customer load. Produces series magnetic flux in-phase with load current.",
+        material: "Heavy Copper Bar (4mm²) + Laminated Core",
+        function: "Produces Series Flux Φs ∝ Load Current I",
+        spec: "Rated: 5A (Max 20A Continuous)",
+        color: "#ea580c",
+        explodeVec: { x: 0, y: -25, z: -15 }
+      },
+      {
+        id: "terminal_block",
+        name: "Terminal Block & Brass Lugs",
+        tag: "Electrical Interface",
+        desc: "Heavy-duty insulating block housing 4 solid brass screw terminals: Line In, Line Out (Load), Neutral In, Neutral Out, plus voltage disconnect link for meter calibration.",
+        material: "Bakelite / Solid Brass Lugs",
+        function: "Main Service Connection & Calibration Link",
+        spec: "M6 Clamping Screws, 500V Insulation",
+        color: "#eab308",
+        explodeVec: { x: 0, y: -80, z: 15 }
+      },
+      {
+        id: "terminal_cover",
+        name: "Terminal Shroud Cover",
+        tag: "Enclosure / Anti-Tamper",
+        desc: "Removable bottom shield covering the main line terminals with utility anti-tamper lead wire seal hole to prevent unauthorized electricity bypass.",
+        material: "Reinforced Phenolic Bakelite",
+        function: "Terminal Shock Protection & Tamper Sealing",
+        spec: "Utility Lead Wire Seal Hole",
+        color: "#475569",
+        explodeVec: { x: 0, y: -115, z: 75 }
+      },
+      {
+        id: "base_case",
+        name: "Main Chassis Base Case",
+        tag: "Structural Frame",
+        desc: "Rigid die-cast base frame providing solid structural mounting for all electromagnetic cores, rotor bearings, and wall-mounting ears with grounding terminal.",
+        material: "Die-Cast Aluminum / Bakelite",
+        function: "Mechanical Foundation & Alignment",
+        spec: "3-Point Wall Mount, Earth Ground",
+        color: "#1e293b",
+        explodeVec: { x: 0, y: 0, z: -50 }
+      }
+    ];
+
+    // --- 2. THREE.JS INITIALIZATION ---
+    const container = document.getElementById("canvas-container");
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0c1017);
+    scene.fog = new THREE.FogExp2(0x0c1017, 0.0018);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+    camera.position.set(130, 80, 240);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxDistance = 600;
+    controls.minDistance = 60;
+    controls.target.set(0, -5, 0);
+
+    // --- 3. LIGHTING RIG ---
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+    scene.add(ambientLight);
+
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.4);
+    keyLight.position.set(120, 150, 150);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.width = 2048;
+    keyLight.shadow.mapSize.height = 2048;
+    keyLight.shadow.camera.near = 10;
+    keyLight.shadow.camera.far = 500;
+    const d = 120;
+    keyLight.shadow.camera.left = -d;
+    keyLight.shadow.camera.right = d;
+    keyLight.shadow.camera.top = d;
+    keyLight.shadow.camera.bottom = -d;
+    keyLight.shadow.bias = -0.0005;
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0x38bdf8, 0.7);
+    fillLight.position.set(-150, 60, -80);
+    scene.add(fillLight);
+
+    const warmUnderLight = new THREE.DirectionalLight(0xf59e0b, 0.4);
+    warmUnderLight.position.set(0, -120, 50);
+    scene.add(warmUnderLight);
+
+    // Floor subtle reflection grid
+    const grid = new THREE.GridHelper(400, 40, 0x1f2937, 0x111827);
+    grid.position.y = -100;
+    scene.add(grid);
+
+    // --- 4. PROCEDURAL PROCEDURAL 3D METER MODEL GENERATION ---
+    const meterAssembly = new THREE.Group();
+    scene.add(meterAssembly);
+
+    const partsMap = new Map(); // id -> THREE.Group with initialPos & explodeVec
+    let coverMeshRef = null;
+
+    // Materials Library
+    const mats = {
+      blackBakelite: new THREE.MeshStandardMaterial({ color: 0x1a1e24, roughness: 0.7, metalness: 0.1 }),
+      chassisGrey: new THREE.MeshStandardMaterial({ color: 0x2d3748, roughness: 0.5, metalness: 0.3 }),
+      laminatedCore: new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.6, metalness: 0.7 }),
+      copperWire: new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.35, metalness: 0.85 }),
+      thickCopper: new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.25, metalness: 0.9 }),
+      aluminumRotor: new THREE.MeshStandardMaterial({ color: 0xd1d5db, roughness: 0.2, metalness: 0.95 }),
+      polishedSteel: new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.15, metalness: 0.98 }),
+      brass: new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.3, metalness: 0.9 }),
+      magnetRed: new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.4, metalness: 0.2 }),
+      magnetPole: new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.3, metalness: 0.8 }),
+      dialPlate: null, // Canvas texture
+      glassCover: new THREE.MeshPhysicalMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.25,
+        roughness: 0.05,
+        metalness: 0.05,
+        transmission: 0.9,
+        ior: 1.5,
+        reflectivity: 0.9,
+        depthWrite: false
+      }),
+      counterDrumWhite: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5 }),
+      counterDrumRed: new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.5 })
+    };
+
+    // Helper: Canvas-rendered Dial Faceplate Texture
+    function createDialFaceplateTexture() {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1024;
+      canvas.height = 1024;
+      const ctx = canvas.getContext("2d");
+
+      // Background plate
+      ctx.fillStyle = "#f1f5f9";
+      ctx.fillRect(0, 0, 1024, 1024);
+
+      // Border outline
+      ctx.strokeStyle = "#cbd5e1";
+      ctx.lineWidth = 16;
+      ctx.strokeRect(30, 30, 964, 964);
+
+      // Inner decorative frame
+      ctx.strokeStyle = "#0f172a";
+      ctx.lineWidth = 4;
+      ctx.strokeRect(60, 60, 904, 904);
+
+      // Utility Name
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "bold 44px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("SINGLE PHASE 2-WIRE WATTHOUR METER", 512, 140);
+
+      ctx.font = "bold 32px monospace";
+      ctx.fillStyle = "#334155";
+      ctx.fillText("TYPE DD862 • INDUCTION SYSTEM", 512, 195);
+
+      // Register Cutout Frame (Window)
+      ctx.fillStyle = "#0f172a";
+      ctx.fillRect(262, 250, 500, 120);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(272, 260, 480, 100);
+
+      // Register Unit label
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "bold 38px sans-serif";
+      ctx.textAlign = "right";
+      ctx.fillText("kWh", 830, 325);
+
+      // Ratings & Technical Specs
+      ctx.font = "bold 32px sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText("220 V", 140, 450);
+      ctx.fillText("5 (20) A", 140, 505);
+      ctx.fillText("50 Hz", 140, 560);
+
+      ctx.textAlign = "right";
+      ctx.fillText("900 r/kWh", 884, 450);
+      ctx.fillText("Class 2.0", 884, 505);
+      ctx.fillText("IEC 62053-11", 884, 560);
+
+      // Center viewing window cutout for disk revolution inspection
+      ctx.fillStyle = "#0f172a";
+      ctx.fillRect(362, 630, 300, 45);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(366, 634, 292, 37);
+
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "bold 22px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("◄ ROTOR ROTATION INDICATOR ►", 512, 715);
+
+      // Anti-Tamper Barcode / Serial
+      ctx.fillStyle = "#0f172a";
+      for (let i = 0; i < 40; i++) {
+        const x = 320 + i * 10;
+        const w = (i % 3 === 0) ? 6 : (i % 2 === 0 ? 3 : 2);
+        ctx.fillRect(x, 770, w, 50);
+      }
+      ctx.font = "24px monospace";
+      ctx.fillText("NO. 2026-91EA5E8E", 512, 850);
+
+      // Connection diagram graphic
+      ctx.strokeStyle = "#475569";
+      ctx.lineWidth = 4;
+      ctx.strokeRect(380, 890, 264, 40);
+      ctx.font = "bold 20px sans-serif";
+      ctx.fillText("1 (L_in)  2 (L_out)  3 (N_in)  4 (N_out)", 512, 918);
+
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.anisotropy = 8;
+      return tex;
+    }
+
+    mats.dialPlate = new THREE.MeshStandardMaterial({
+      map: createDialFaceplateTexture(),
+      roughness: 0.35,
+      metalness: 0.15
+    });
+
+    // Helper: Register Number Drums Texture
+    function createDrumTexture(num, isRed = false) {
+      const c = document.createElement("canvas");
+      c.width = 128;
+      c.height = 256;
+      const x = c.getContext("2d");
+      x.fillStyle = isRed ? "#dc2626" : "#ffffff";
+      x.fillRect(0, 0, 128, 256);
+      x.fillStyle = isRed ? "#ffffff" : "#000000";
+      x.font = "bold 130px monospace";
+      x.textAlign = "center";
+      x.textBaseline = "middle";
+      x.fillText(num, 64, 128);
+      return new THREE.CanvasTexture(c);
+    }
+
+    // --- ASSEMBLE EACH PART GROUP ---
+
+    // 1. BASE CHASSIS
+    const groupBase = new THREE.Group();
+    {
+      // Main back wall plate
+      const backPlate = new THREE.Mesh(new THREE.BoxGeometry(94, 126, 14), mats.blackBakelite);
+      backPlate.position.set(0, 0, -8);
+      backPlate.castShadow = true;
+      backPlate.receiveShadow = true;
+      groupBase.add(backPlate);
+
+      // Outer raised rim
+      const rimTop = new THREE.Mesh(new THREE.BoxGeometry(98, 8, 26), mats.blackBakelite);
+      rimTop.position.set(0, 63, -2);
+      groupBase.add(rimTop);
+
+      const rimSidesL = new THREE.Mesh(new THREE.BoxGeometry(8, 134, 26), mats.blackBakelite);
+      rimSidesL.position.set(-47, 0, -2);
+      groupBase.add(rimSidesL);
+
+      const rimSidesR = new THREE.Mesh(new THREE.BoxGeometry(8, 134, 26), mats.blackBakelite);
+      rimSidesR.position.set(47, 0, -2);
+      groupBase.add(rimSidesR);
+
+      // Top mounting ear (wall hook)
+      const topEar = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 6, 24), mats.chassisGrey);
+      topEar.rotation.x = Math.PI / 2;
+      topEar.position.set(0, 72, -10);
+      groupBase.add(topEar);
+
+      // Brass mounting screw inserts
+      [-36, 36].forEach(x => {
+        const ear = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 6, 24), mats.brass);
+        ear.rotation.x = Math.PI / 2;
+        ear.position.set(x, -64, -10);
+        groupBase.add(ear);
+      });
+    }
+
+    // 2. TERMINAL BLOCK & BRASS LUGS
+    const groupTerminals = new THREE.Group();
+    {
+      const block = new THREE.Mesh(new THREE.BoxGeometry(86, 28, 28), mats.blackBakelite);
+      block.position.set(0, -68, 8);
+      block.castShadow = true;
+      groupTerminals.add(block);
+
+      // 4 Brass terminal lugs
+      [-30, -10, 10, 30].forEach(x => {
+        const lug = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 4.5, 20, 16), mats.brass);
+        lug.position.set(x, -70, 14);
+        groupTerminals.add(lug);
+
+        // Clamping screw
+        const screw = new THREE.Mesh(new THREE.CylinderGeometry(3.5, 3.5, 5, 12), mats.polishedSteel);
+        screw.position.set(x, -58, 14);
+        groupTerminals.add(screw);
+
+        // Hole at bottom for wire entry
+        const wireEntry = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 6, 12), mats.blackBakelite);
+        wireEntry.position.set(x, -81, 14);
+        groupTerminals.add(wireEntry);
+      });
+    }
+
+    // 3. VOLTAGE ELEMENT (SHUNT ELECTROMAGNET)
+    const groupVoltageCoil = new THREE.Group();
+    {
+      // E-shaped laminated silicon core (upper)
+      const eCoreTop = new THREE.Mesh(new THREE.BoxGeometry(60, 10, 20), mats.laminatedCore);
+      eCoreTop.position.set(0, 48, 4);
+      groupVoltageCoil.add(eCoreTop);
+
+      const eCoreCenter = new THREE.Mesh(new THREE.BoxGeometry(16, 32, 20), mats.laminatedCore);
+      eCoreCenter.position.set(0, 30, 4);
+      groupVoltageCoil.add(eCoreCenter);
+
+      [-24, 24].forEach(x => {
+        const sideLeg = new THREE.Mesh(new THREE.BoxGeometry(10, 32, 20), mats.laminatedCore);
+        sideLeg.position.set(x, 30, 4);
+        groupVoltageCoil.add(sideLeg);
+      });
+
+      // Big high-turn fine copper coil wound around center leg
+      const coil = new THREE.Mesh(new THREE.CylinderGeometry(15, 15, 24, 24), mats.copperWire);
+      coil.position.set(0, 30, 4);
+      coil.rotation.z = Math.PI / 2;
+      coil.castShadow = true;
+      groupVoltageCoil.add(coil);
+
+      // Copper shading rings (phase compensator band)
+      const shadingBand = new THREE.Mesh(new THREE.TorusGeometry(12, 1.6, 12, 24), mats.thickCopper);
+      shadingBand.position.set(0, 16, 4);
+      shadingBand.rotation.x = Math.PI / 2;
+      groupVoltageCoil.add(shadingBand);
+    }
+
+    // 4. CURRENT ELEMENT (SERIES ELECTROMAGNET)
+    const groupCurrentCoil = new THREE.Group();
+    {
+      // U-shaped core (lower)
+      const uBase = new THREE.Mesh(new THREE.BoxGeometry(50, 8, 18), mats.laminatedCore);
+      uBase.position.set(0, -32, 4);
+      groupCurrentCoil.add(uBase);
+
+      [-18, 18].forEach(x => {
+        const leg = new THREE.Mesh(new THREE.BoxGeometry(12, 22, 18), mats.laminatedCore);
+        leg.position.set(x, -18, 4);
+        groupCurrentCoil.add(leg);
+
+        // Heavy gauge thick copper series windings
+        const seriesWinding = new THREE.Mesh(new THREE.CylinderGeometry(9, 9, 14, 20), mats.thickCopper);
+        seriesWinding.position.set(x, -18, 4);
+        seriesWinding.castShadow = true;
+        groupCurrentCoil.add(seriesWinding);
+      });
+    }
+
+    // 5. MOVING ROTOR SYSTEM (ALUMINUM DISC & SPINDLE)
+    const groupRotor = new THREE.Group();
+    let rotorDiscMesh = null;
+    {
+      // Central vertical steel spindle
+      const spindle = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 76, 16), mats.polishedSteel);
+      spindle.position.set(0, 2, 22);
+      spindle.castShadow = true;
+      groupRotor.add(spindle);
+
+      // Top worm gear (meshes with cyclometer)
+      const worm = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.6, 12, 16), mats.brass);
+      worm.position.set(0, 32, 22);
+      groupRotor.add(worm);
+
+      // Aluminum circular rotor disc
+      const discGeom = new THREE.CylinderGeometry(38, 38, 1.5, 48);
+      rotorDiscMesh = new THREE.Mesh(discGeom, mats.aluminumRotor);
+      rotorDiscMesh.position.set(0, 2, 22);
+      rotorDiscMesh.castShadow = true;
+      groupRotor.add(rotorDiscMesh);
+
+      // Stroboscopic black radial edge marker
+      const marker = new THREE.Mesh(new THREE.BoxGeometry(6, 1.8, 10), new THREE.MeshBasicMaterial({ color: 0x000000 }));
+      marker.position.set(0, 2, 54);
+      groupRotor.add(marker);
+
+      // Anti-creep damping holes
+      [Math.PI / 2, -Math.PI / 2].forEach(angle => {
+        const hole = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, 2.2, 12), mats.blackBakelite);
+        hole.position.set(Math.cos(angle) * 26, 2, 22 + Math.sin(angle) * 26);
+        groupRotor.add(hole);
+      });
+    }
+
+    // 6. PERMANENT BRAKING MAGNET
+    const groupBrakeMagnet = new THREE.Group();
+    {
+      // Horseshoe / C-shaped AlNiCo permanent magnet
+      const cBack = new THREE.Mesh(new THREE.BoxGeometry(14, 34, 16), mats.magnetRed);
+      cBack.position.set(-36, 2, 22);
+      cBack.castShadow = true;
+      groupBrakeMagnet.add(cBack);
+
+      // Upper arm
+      const armTop = new THREE.Mesh(new THREE.BoxGeometry(26, 8, 16), mats.magnetRed);
+      armTop.position.set(-20, 15, 22);
+      groupBrakeMagnet.add(armTop);
+
+      // Lower arm
+      const armBtm = new THREE.Mesh(new THREE.BoxGeometry(26, 8, 16), mats.magnetRed);
+      armBtm.position.set(-20, -11, 22);
+      groupBrakeMagnet.add(armBtm);
+
+      // High-permeability steel pole shoes (straddles the disc with 3mm air gap)
+      const poleTop = new THREE.Mesh(new THREE.CylinderGeometry(6, 6, 6, 16), mats.magnetPole);
+      poleTop.position.set(-10, 8, 22);
+      groupBrakeMagnet.add(poleTop);
+
+      const poleBtm = new THREE.Mesh(new THREE.CylinderGeometry(6, 6, 6, 16), mats.magnetPole);
+      poleBtm.position.set(-10, -4, 22);
+      groupBrakeMagnet.add(poleBtm);
+
+      // Fine adjustment screw for calibration
+      const calibScrew = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 10, 12), mats.brass);
+      calibScrew.rotation.z = Math.PI / 2;
+      calibScrew.position.set(-46, 2, 22);
+      groupBrakeMagnet.add(calibScrew);
+    }
+
+    // 7. JEWEL BEARINGS & SUPPORT BRACKETS
+    const groupBearings = new THREE.Group();
+    {
+      // Bottom bearing cup (synthetic sapphire housing)
+      const btmCup = new THREE.Mesh(new THREE.CylinderGeometry(5, 4, 14, 16), mats.brass);
+      btmCup.position.set(0, -36, 22);
+      groupBearings.add(btmCup);
+
+      // Top guide bearing pin
+      const topPin = new THREE.Mesh(new THREE.CylinderGeometry(4, 3, 12, 16), mats.brass);
+      topPin.position.set(0, 42, 22);
+      groupBearings.add(topPin);
+
+      // Structural bridge bracket
+      const bridge = new THREE.Mesh(new THREE.BoxGeometry(78, 6, 6), mats.chassisGrey);
+      bridge.position.set(0, 42, 18);
+      groupBearings.add(bridge);
+    }
+
+    // 8. CYCLOMETER GEAR REGISTER
+    const groupRegister = new THREE.Group();
+    {
+      // Brass side plates frame
+      [-26, 26].forEach(x => {
+        const sideFrame = new THREE.Mesh(new THREE.BoxGeometry(2, 22, 28), mats.brass);
+        sideFrame.position.set(x, 26, 32);
+        groupRegister.add(sideFrame);
+      });
+
+      // 6 Digit roller drums (5 White whole + 1 Red decimal)
+      const digits = ["0", "0", "4", "2", "8", "5"];
+      digits.forEach((digit, idx) => {
+        const isDecimal = (idx === 5);
+        const drumMat = new THREE.MeshStandardMaterial({
+          map: createDrumTexture(digit, isDecimal),
+          roughness: 0.4
+        });
+        const drum = new THREE.Mesh(new THREE.CylinderGeometry(6.5, 6.5, 7.5, 24), drumMat);
+        drum.rotation.z = Math.PI / 2;
+        drum.position.set(-20 + idx * 8, 26, 32);
+        drum.castShadow = true;
+        groupRegister.add(drum);
+      });
+
+      // Pinion shaft & brass gears
+      const drumAxle = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 54, 12), mats.polishedSteel);
+      drumAxle.rotation.z = Math.PI / 2;
+      drumAxle.position.set(0, 26, 32);
+      groupRegister.add(drumAxle);
+
+      const wormGear = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, 3, 20), mats.brass);
+      wormGear.position.set(0, 32, 27);
+      wormGear.rotation.x = Math.PI / 2;
+      groupRegister.add(wormGear);
+    }
+
+    // 9. DIAL FACEPLATE / NAMEPLATE
+    const groupDialPlate = new THREE.Group();
+    {
+      const plate = new THREE.Mesh(new THREE.BoxGeometry(86, 116, 2), mats.dialPlate);
+      plate.position.set(0, 2, 42);
+      plate.castShadow = true;
+      groupDialPlate.add(plate);
+
+      // 4 Corner fixing screws
+      [[-38, 54], [38, 54], [-38, -50], [38, -50]].forEach(([x, y]) => {
+        const screw = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.5, 3, 12), mats.polishedSteel);
+        screw.rotation.x = Math.PI / 2;
+        screw.position.set(x, y, 42.5);
+        groupDialPlate.add(screw);
+      });
+    }
+
+    // 10. TRANSPARENT FRONT COVER
+    const groupFrontCover = new THREE.Group();
+    {
+      // Polycarbonate deep dome
+      const cover = new THREE.Mesh(new THREE.BoxGeometry(94, 128, 44), mats.glassCover);
+      cover.position.set(0, 0, 60);
+      coverMeshRef = cover;
+      groupFrontCover.add(cover);
+
+      // Beveled viewing glass frame / rubber sealing rim
+      const rim = new THREE.Mesh(new THREE.BoxGeometry(96, 130, 4), mats.blackBakelite);
+      rim.position.set(0, 0, 40);
+      groupFrontCover.add(rim);
+
+      // Knurled sealing thumb screws
+      [-42, 42].forEach(x => {
+        const sealScrew = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 16, 16), mats.brass);
+        sealScrew.rotation.x = Math.PI / 2;
+        sealScrew.position.set(x, 0, 64);
+        groupFrontCover.add(sealScrew);
+      });
+    }
+
+    // 11. TERMINAL SHROUD COVER
+    const groupTerminalCover = new THREE.Group();
+    {
+      const shroud = new THREE.Mesh(new THREE.BoxGeometry(90, 36, 32), mats.blackBakelite);
+      shroud.position.set(0, -68, 20);
+      shroud.castShadow = true;
+      groupTerminalCover.add(shroud);
+
+      // Anti-tamper utility lead wire sealing screw
+      const tamperLug = new THREE.Mesh(new THREE.CylinderGeometry(3.5, 3.5, 12, 12), mats.brass);
+      tamperLug.rotation.x = Math.PI / 2;
+      tamperLug.position.set(0, -68, 36);
+      groupTerminalCover.add(tamperLug);
+
+      // Lead seal tag
+      const leadSeal = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 4.5, 2, 16), mats.polishedSteel);
+      leadSeal.position.set(0, -74, 38);
+      groupTerminalCover.add(leadSeal);
+    }
+
+    // Register into system map
+    const PART_GROUPS = [
+      { id: "cover_front", group: groupFrontCover },
+      { id: "dial_plate", group: groupDialPlate },
+      { id: "cyclometer", group: groupRegister },
+      { id: "brake_magnet", group: groupBrakeMagnet },
+      { id: "rotor_disc", group: groupRotor },
+      { id: "bearings", group: groupBearings },
+      { id: "voltage_coil", group: groupVoltageCoil },
+      { id: "current_coil", group: groupCurrentCoil },
+      { id: "terminal_block", group: groupTerminals },
+      { id: "terminal_cover", group: groupTerminalCover },
+      { id: "base_case", group: groupBase }
+    ];
+
+    PART_GROUPS.forEach(item => {
+      const info = COMPONENTS.find(c => c.id === item.id);
+      item.group.userData = {
+        id: item.id,
+        initialPos: item.group.position.clone(),
+        explodeVec: info.explodeVec,
+        info: info
+      };
+      // Tag all child meshes with part ID for raycasting
+      item.group.traverse(child => {
+        if (child.isMesh) {
+          child.userData.partId = item.id;
+        }
+      });
+      partsMap.set(item.id, item.group);
+      meterAssembly.add(item.group);
+    });
+
+    // --- 5. UI GENERATION & INTERACTION LOGIC ---
+    const partListContainer = document.getElementById("part-list-container");
+    COMPONENTS.forEach(comp => {
+      const item = document.createElement("div");
+      item.className = "part-item";
+      item.dataset.id = comp.id;
+      item.innerHTML = `
+        <span class="part-color-dot" style="background: ${comp.color}"></span>
+        <span>${comp.name}</span>
+      `;
+      item.addEventListener("click", () => selectComponent(comp.id));
+      partListContainer.appendChild(item);
+    });
+
+    let currentExplodeFactor = 0; // 0 to 1
+    const slider = document.getElementById("explode-slider");
+    const pctLabel = document.getElementById("explode-pct");
+
+    function setExplosion(val) {
+      currentExplodeFactor = THREE.MathUtils.clamp(val, 0, 1);
+      slider.value = Math.round(currentExplodeFactor * 100);
+      pctLabel.textContent = `${slider.value}%`;
+
+      partsMap.forEach((grp) => {
+        const init = grp.userData.initialPos;
+        const vec = grp.userData.explodeVec;
+        grp.position.x = init.x + vec.x * currentExplodeFactor;
+        grp.position.y = init.y + vec.y * currentExplodeFactor;
+        grp.position.z = init.z + vec.z * currentExplodeFactor;
+      });
+    }
+
+    slider.addEventListener("input", (e) => {
+      isAutoExploding = false;
+      btnAnimate.classList.remove("active");
+      animText.textContent = "Auto Explode";
+      setExplosion(parseFloat(e.target.value) / 100);
+    });
+
+    // Auto Explode Animation Loop
+    let isAutoExploding = false;
+    let animDirection = 1;
+    const btnAnimate = document.getElementById("btn-animate");
+    const animText = document.getElementById("anim-text");
+
+    btnAnimate.addEventListener("click", () => {
+      isAutoExploding = !isAutoExploding;
+      if (isAutoExploding) {
+        btnAnimate.classList.add("active");
+        animText.textContent = "Pause Animation";
+      } else {
+        btnAnimate.classList.remove("active");
+        animText.textContent = "Auto Explode";
+      }
+    });
+
+    // X-Ray Cover Toggle
+    let isXRay = false;
+    const btnXRay = document.getElementById("btn-xray");
+    btnXRay.addEventListener("click", () => {
+      isXRay = !isXRay;
+      btnXRay.classList.toggle("active", isXRay);
+      if (coverMeshRef) {
+        coverMeshRef.material.opacity = isXRay ? 0.05 : 0.25;
+        coverMeshRef.material.roughness = isXRay ? 0.1 : 0.05;
+      }
+    });
+
+    // Reset Camera & View
+    document.getElementById("btn-reset").addEventListener("click", () => {
+      setExplosion(0);
+      isAutoExploding = false;
+      btnAnimate.classList.remove("active");
+      animText.textContent = "Auto Explode";
+      camera.position.set(130, 80, 240);
+      controls.target.set(0, -5, 0);
+      controls.update();
+      selectComponent("cover_front");
+    });
+
+    // Component Selection / Info Update
+    let selectedPartId = "cover_front";
+    function selectComponent(id) {
+      selectedPartId = id;
+      const data = COMPONENTS.find(c => c.id === id);
+      if (!data) return;
+
+      // Update info card
+      document.getElementById("info-name").textContent = data.name;
+      document.getElementById("info-tag").textContent = data.tag;
+      document.getElementById("info-desc").textContent = data.desc;
+      document.getElementById("info-material").textContent = data.material;
+      document.getElementById("info-func").textContent = data.function;
+      document.getElementById("info-spec").textContent = data.spec;
+
+      // Update toolbar active item
+      document.querySelectorAll(".part-item").forEach(el => {
+        el.classList.toggle("active", el.dataset.id === id);
+      });
+
+      // Emissive highlight pulse on selected component
+      partsMap.forEach((grp, gid) => {
+        grp.traverse(child => {
+          if (child.isMesh && child.material && child.material.emissive) {
+            if (gid === id) {
+              child.material.emissive.setHex(0x1e3a8a);
+              child.material.emissiveIntensity = 0.6;
+            } else {
+              child.material.emissive.setHex(0x000000);
+              child.material.emissiveIntensity = 0;
+            }
+          }
+        });
+      });
+    }
+
+    // Raycasting Click-to-Select
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    window.addEventListener("pointerdown", (e) => {
+      // Ignore clicks on control panels
+      if (e.target.closest(".control-panel") || e.target.closest(".info-card") || e.target.closest(".parts-toolbar") || e.target.closest(".header")) {
+        return;
+      }
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(meterAssembly.children, true);
+      if (intersects.length > 0) {
+        let hit = intersects[0].object;
+        while (hit && !hit.userData.partId && hit.parent !== meterAssembly) {
+          hit = hit.parent;
+        }
+        if (hit && hit.userData.partId) {
+          selectComponent(hit.userData.partId);
+        }
+      }
+    });
+
+    // --- 6. GLTF EXPORTER BUTTON ---
+    document.getElementById("btn-export").addEventListener("click", () => {
+      const exporter = new THREE.GLTFExporter();
+      const previousFactor = currentExplodeFactor;
+      // Reset to 0 for clean canonical export
+      setExplosion(0);
+
+      exporter.parse(
+        meterAssembly,
+        (gltf) => {
+          const blob = new Blob([gltf], { type: "application/octet-stream" });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = "kwh_meter_induction_model.glb";
+          link.click();
+          URL.revokeObjectURL(link.href);
+          setExplosion(previousFactor);
+        },
+        { binary: true }
+      );
+    });
+
+    // --- 7. MAIN RENDER & ANIMATION LOOP ---
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+
+      // Slow rotor disc rotation to show operation (active eddy current rotation)
+      if (rotorDiscMesh) {
+        rotorDiscMesh.rotation.y += delta * 0.8;
+      }
+
+      // Auto Explode Smooth Oscillation
+      if (isAutoExploding) {
+        let nextVal = currentExplodeFactor + delta * 0.25 * animDirection;
+        if (nextVal >= 1.0) {
+          nextVal = 1.0;
+          animDirection = -1;
+        } else if (nextVal <= 0.0) {
+          nextVal = 0.0;
+          animDirection = 1;
+        }
+        setExplosion(nextVal);
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Initial setup
+    selectComponent("cover_front");
+    animate();
+  </script>
+</body>
+</html>
