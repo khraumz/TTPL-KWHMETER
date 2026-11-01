@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simulasi 3D Exploded View - kWh Meter Induksi (Laboratorium TTPL FTUI)</title>
+  <title>KWH METER EXPLODED VIEW - 3D Simulation</title>
   <style>
     /* ==========================================================================
-       STANDAR GAYA & TEMA LABORATORIUM TTPL 2026:
-       - Fasa A / Daya Aktif (P): #004FBD (Biru)
-       - Fasa B / Daya Reaktif (Q): #FFF100 (Kuning Murni)
-       - Fasa C / Daya Semu (S): #9ADD67 (Hijau Limau)
-       - Seluruh Font: Hitam (#000000) & Navy Heading (#0f2744)
-       - Card: #ffffff dengan shadow halus, border #e2e8f0 / rgba(0,0,0,0.06)
+       STANDAR GAYA & TEMA TTPL:
+       - Biru Utama: #004FBD
+       - Kuning Murni: #FFF100
+       - Hijau Limau: #9ADD67
+       - Seluruh Font: Hitam (#000000) / Navy (#0f2744)
+       - Card: #ffffff dengan shadow 0 4px 20px rgba(0,0,0,0.04), border 1px solid rgba(0,0,0,0.06)
        ========================================================================== */
     * {
       box-sizing: border-box;
@@ -38,81 +38,122 @@
       z-index: 1;
     }
 
-    /* Top Global Header Bar (TTPL Style) */
+    /* Global Navigation Bar & Mode Switcher (Matching TTPL Header) */
     .header-bar {
       position: absolute;
       top: 14px;
       left: 20px;
       right: 20px;
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
       gap: 12px;
-      padding: 10px 18px;
+      padding: 12px 18px;
       background: #ffffff;
       border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
       border: 1px solid rgba(0,0,0,0.06);
+      box-sizing: border-box;
       z-index: 10;
-    }
-
-    .title-group {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      flex-wrap: wrap;
     }
 
     .pill-badge {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      font-size: 13px;
-      font-weight: 800;
+      font-size: 16pt;
+      font-weight: bold;
       letter-spacing: -0.02em;
       color: #0f2744;
       background: linear-gradient(135deg, #dbeafe 0%, #ccfbf1 50%, #fef9c3 100%);
-      padding: 6px 18px 6px 12px;
+      padding: 7px 20px 7px 14px;
       border-radius: 9999px;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 10px;
+      white-space: nowrap !important;
+      line-height: 1.2;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 8px 20px -4px rgba(14, 165, 233, 0.15), 0 3px 6px -2px rgba(15, 23, 42, 0.04), inset 0 1.5px 2px rgba(255, 255, 255, 0.9);
+      margin: 0;
+    }
+
+    .pill-svg {
+      width: 34px !important;
+      height: 18px !important;
+      min-width: 34px !important;
+      max-width: 34px !important;
+      min-height: 18px !important;
+      max-height: 18px !important;
+      display: inline-block !important;
+      vertical-align: middle !important;
+      margin: 0 !important;
+      overflow: hidden !important;
+      flex-shrink: 0 !important;
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%) !important;
+      mask-image: linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%) !important;
+    }
+
+    /* View Switcher Tabs & Language Button in Header */
+    .hdr-tabs-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+    }
+
+    .hdr-nav-btn {
+      border: none;
+      background: transparent;
+      color: #000000;
+      padding: 6px 12px;
+      border-radius: 7px;
+      font-weight: 800;
+      font-size: 0.76rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .hdr-nav-btn.active {
+      background: #ffffff;
+      color: #000000;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .hdr-lang-btn {
+      border: 1px solid #004FBD;
+      background: rgba(0, 79, 189, 0.08);
+      color: #000000;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      white-space: nowrap;
-      line-height: 1.2;
-      border: 1px solid rgba(255, 255, 255, 0.95);
-      box-shadow: 0 6px 16px -3px rgba(14, 165, 233, 0.15), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+      gap: 4px;
     }
 
-    .main-title {
-      font-size: 16px;
-      font-weight: 900;
-      letter-spacing: -0.3px;
-      color: #0f2744;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+    .hdr-lang-btn:hover {
+      background: #004FBD;
+      color: #ffffff;
     }
 
-    .main-title span.grad {
-      background: linear-gradient(90deg, #004FBD 0%, #0284c7 50%, #9ADD67 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .subtitle-tag {
-      font-size: 11px;
-      font-weight: 800;
-      color: #0f2744;
-      background: rgba(154, 221, 103, 0.28);
-      border: 1px solid #9ADD67;
-      padding: 3px 8px;
-      border-radius: 6px;
+    .hdr-lang-btn .lang-active-tag {
+      background: #004FBD;
+      color: #ffffff;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 0.7rem;
     }
 
     /* Left Component Navigation Card */
     .parts-toolbar {
       position: absolute;
-      top: 82px;
+      top: 86px;
       left: 20px;
       background: #ffffff;
       border-radius: 16px;
@@ -183,7 +224,7 @@
     /* Right Component Info Card (TTPL Card Style) */
     .info-card {
       position: absolute;
-      top: 82px;
+      top: 86px;
       right: 20px;
       width: 325px;
       background: #ffffff;
@@ -407,36 +448,44 @@
   <!-- 3D Canvas Viewport -->
   <div id="canvas-container"></div>
 
-  <!-- Global Navigation Bar (TTPL Style) -->
+  <!-- Global Navigation Bar (Exact TTPL Header Bar) -->
   <div class="header-bar">
-    <div class="title-group">
-      <!-- Animated Sine Wave Pill -->
+    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+      <!-- Pill Badge with Animated Sine Wave -->
       <div class="pill-badge">
-        <svg style="width: 32px; height: 18px; min-width: 32px; max-width: 32px; display: inline-block; vertical-align: middle; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%); mask-image: linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%);">
+        <svg class="pill-svg">
           <path d="M -32 9 Q -28 -2 -24 9 T -16 9 T -8 9 T 0 9 T 8 9 T 16 9 T 24 9 T 32 9 T 40 9 T 48 9 T 56 9 T 64 9"
-            fill="none" stroke="#004FBD" stroke-width="2.4" stroke-linecap="round">
+            fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round">
             <animateTransform attributeName="transform" type="translate" from="0,0" to="-16,0" dur="1s" repeatCount="indefinite" />
           </path>
         </svg>
-        SIMULASI 3D TTPL
-      </div>
-
-      <div class="main-title">
-        <span class="grad">kWh Meter 1-Fasa</span>
-        <span style="font-weight: 600; font-size: 13px; color: #64748b;">(Induksi Ferraris)</span>
+        <span id="nav-badge-title">KWH METER EXPLODED VIEW</span>
       </div>
     </div>
 
-    <div style="display: flex; gap: 8px; align-items: center;">
-      <span class="subtitle-tag">Lab. Instrumentasi & Pengukuran FTUI</span>
+    <!-- View Switcher Tabs + Bilingual Language Toggle -->
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+      <div class="hdr-tabs-container">
+        <button id="hdr-btn-view-all" class="hdr-nav-btn active" type="button">Semua Bagian</button>
+        <button id="hdr-btn-view-drive" class="hdr-nav-btn" type="button">Sistem Penggerak</button>
+        <button id="hdr-btn-view-rotor" class="hdr-nav-btn" type="button">Rotor & Pengerem</button>
+        <button id="hdr-btn-view-reg" class="hdr-nav-btn" type="button">Register & Cover</button>
+      </div>
+
+      <!-- Bilingual ID / EN Toggle Button -->
+      <button id="hdr-btn-lang" class="hdr-lang-btn" type="button" title="Ganti Bahasa / Switch Language">
+        <span id="lang-tag-id" class="lang-active-tag">ID</span>
+        <span>/</span>
+        <span id="lang-tag-en">EN</span>
+      </button>
     </div>
   </div>
 
   <!-- Left Component Directory -->
   <div class="parts-toolbar">
     <div class="parts-toolbar-header">
-      <span>Daftar Komponen</span>
-      <span style="font-size: 10px; color: #004FBD;">11 Bagian</span>
+      <span id="txt-parts-title">Daftar Komponen</span>
+      <span id="txt-parts-count" style="font-size: 10px; color: #004FBD;">11 Bagian</span>
     </div>
     <div id="part-list-container"></div>
   </div>
@@ -446,34 +495,34 @@
     <div class="info-card-top-accent"></div>
     <h3>
       <span id="info-name">Tutup Kaca Transparan</span>
-      <span class="tag" id="info-tag">Enclosure</span>
+      <span class="tag" id="info-tag">Proteksi Enclosure</span>
     </h3>
-    <p id="info-desc">Kubah polikarbonat bening tahan benturan yang melindungi mekanisme internal meter dari debu dan kelembapan, serta dilengkapi segel kawat timah anti-pencurian listrik.</p>
+    <p id="info-desc">Kubah polikarbonat transparan tahan benturan dengan baut segel kuningan untuk mencegah pembukaan tanpa izin oleh pihak selain PLN.</p>
     
     <div class="info-specs-box">
       <div class="specs-row">
-        <span class="specs-label">Material:</span>
+        <span class="specs-label" id="lbl-info-mat">Material:</span>
         <span class="specs-val" id="info-material">Polikarbonat UV-Stabilized</span>
       </div>
       <div class="specs-row">
-        <span class="specs-label">Fungsi:</span>
+        <span class="specs-label" id="lbl-info-func">Fungsi:</span>
         <span class="specs-val" id="info-func">Proteksi Lingkungan & Inspeksi</span>
       </div>
       <div class="specs-row">
-        <span class="specs-label">Spesifikasi:</span>
-        <span class="specs-val" id="info-spec">Rating Proteksi IP54</span>
+        <span class="specs-label" id="lbl-info-spec">Spesifikasi:</span>
+        <span class="specs-val" id="info-spec">Standar Proteksi IP54</span>
       </div>
     </div>
   </div>
 
   <!-- User Interaction Hint -->
-  <div class="interaction-hint">Klik Kiri: Putar 360° | Klik Kanan: Geser | Scroll: Zoom | Klik Komponen untuk Detail</div>
+  <div class="interaction-hint" id="txt-hint">Klik Kiri: Putar 360° | Klik Kanan: Geser | Scroll: Zoom | Klik Komponen untuk Detail</div>
 
   <!-- Bottom Disassembly Controls -->
   <div class="control-panel">
     <div class="slider-group">
       <div class="slider-header">
-        <span>Tingkat Pemisahan (Exploded View)</span>
+        <span id="lbl-slider-title">Tingkat Pemisahan (Exploded View)</span>
         <span class="pct" id="explode-pct">0%</span>
       </div>
       <input type="range" id="explode-slider" min="0" max="100" value="0">
@@ -491,7 +540,7 @@
       <button class="btn" id="btn-reset">Reset Sudut</button>
       <button class="btn" id="btn-export" title="Unduh file model 3D .GLB">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Unduh GLB
+        <span id="btn-export-text">Unduh GLB</span>
       </button>
     </div>
   </div>
@@ -502,126 +551,205 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/GLTFExporter.js"></script>
 
   <script>
-    // --- 1. DATA KOMPONEN KWH METER (STANDAR TTPL) ---
+    // --- 1. DATA KOMPONEN KWH METER (LENGKAP DUA BAHASA ID & EN) ---
+    let currentLang = 'id'; // 'id' (Bahasa Indonesia) or 'en' (English)
+
     const COMPONENTS = [
       {
         id: "cover_front",
-        name: "Tutup Kaca Transparan",
-        tag: "Proteksi Enclosure",
-        desc: "Kubah polikarbonat transparan tahan benturan dengan baut segel kuningan untuk mencegah pembukaan tanpa izin oleh pihak selain PLN.",
-        material: "Polikarbonat / Kaca Akrilik",
-        function: "Proteksi Mekanisme & Pembacaan Angka",
-        spec: "Standar Proteksi IP54",
-        color: "#004FBD", // Biru Fasa A
+        category: "reg",
+        name_id: "Tutup Kaca Transparan",
+        name_en: "Transparent Front Cover",
+        tag_id: "Proteksi Enclosure",
+        tag_en: "Enclosure Protection",
+        desc_id: "Kubah polikarbonat transparan tahan benturan dengan baut segel kuningan untuk mencegah pembukaan tanpa izin oleh pihak selain PLN.",
+        desc_en: "Impact-resistant transparent polycarbonate dome with brass sealing screws to prevent unauthorized access or tampering.",
+        material_id: "Polikarbonat UV-Stabilized",
+        material_en: "UV-Stabilized Polycarbonate",
+        function_id: "Proteksi Lingkungan & Inspeksi",
+        function_en: "Environmental Seal & Visual Reading",
+        spec_id: "Standar Proteksi IP54",
+        spec_en: "Ingress Protection IP54",
+        color: "#004FBD",
         explodeVec: { x: 0, y: 0, z: 120 }
       },
       {
         id: "dial_plate",
-        name: "Pelat Skala & Nameplate",
-        tag: "Register Subsystem",
-        desc: "Pelat aluminium berisi data spesifikasi (220V, 5(20)A, 50Hz, 900 putaran/kWh, Kelas 2.0), jendela pembacaan drum angka, dan celah pengamatan piringan.",
-        material: "Aluminium Anodized Sheet",
-        function: "Informasi Kalibrasi & Rating Utility",
-        spec: "Konstanta Meter Ck = 900 r/kWh",
-        color: "#9ADD67", // Hijau Limau
+        category: "reg",
+        name_id: "Pelat Skala & Nameplate",
+        name_en: "Dial Faceplate & Nameplate",
+        tag_id: "Register Subsystem",
+        tag_en: "Register Subsystem",
+        desc_id: "Pelat aluminium berisi data spesifikasi (220V, 5(20)A, 50Hz, 900 putaran/kWh, Kelas 2.0), jendela drum angka, dan celah pengamatan piringan.",
+        desc_en: "Anodized aluminum dial plate showing ratings (220V, 5(20)A, 50Hz, 900 rev/kWh, Class 2.0), cyclometer windows, and disk rotation slot.",
+        material_id: "Aluminium Anodized Sheet",
+        material_en: "Anodized Aluminum Sheet",
+        function_id: "Informasi Kalibrasi & Rating Utility",
+        function_en: "Rating Display & Anti-Tamper Identification",
+        spec_id: "Konstanta Meter Ck = 900 r/kWh",
+        spec_en: "Meter Constant Ck = 900 r/kWh",
+        color: "#9ADD67",
         explodeVec: { x: 0, y: 15, z: 90 }
       },
       {
         id: "cyclometer",
-        name: "Register Angka (Cyclometer)",
-        tag: "Sistem Penghitung",
-        desc: "Mekanisme roda gigi desimal yang mengintegrasikan putaran poros menjadi nilai akumulasi energi listrik (kWh). Terdiri dari 5 digit hitam dan 1 digit desimal merah (0.1 kWh).",
-        material: "Delrin & Gear Pinion Kuningan",
-        function: "Integrasi Energi Kumulatif (kWh)",
-        spec: "Rasio Gigi 10:1 per Dekade",
-        color: "#FFF100", // Kuning Murni Fasa B
+        category: "reg",
+        name_id: "Register Angka (Cyclometer)",
+        name_en: "Cyclometer Gear Register",
+        tag_id: "Sistem Penghitung",
+        tag_en: "Counting Mechanism",
+        desc_id: "Mekanisme roda gigi desimal yang mengintegrasikan putaran poros menjadi nilai akumulasi energi listrik (kWh). Terdiri dari 5 digit hitam dan 1 digit desimal merah (0.1 kWh).",
+        desc_en: "Decade gear train counting total consumed energy (kWh). Comprises 5 black whole kWh drums and 1 red decimal drum (0.1 kWh).",
+        material_id: "Delrin & Gear Pinion Kuningan",
+        material_en: "Delrin & Brass Pinion Gears",
+        function_id: "Integrasi Energi Kumulatif (kWh)",
+        function_en: "Cumulative Energy Integration (kWh)",
+        spec_id: "Rasio Gigi 10:1 per Dekade",
+        spec_en: "10:1 Gear Ratio per Decade",
+        color: "#FFF100",
         explodeVec: { x: 0, y: 40, z: 65 }
       },
       {
         id: "brake_magnet",
-        name: "Magnet Permanen Pengerem",
-        tag: "Sistem Pengereman",
-        desc: "Magnet tapal kuda AlNiCo yang menjepit tepi piringan aluminium. Menimbulkan torsi pengereman lawan (Tb ∝ kecepatan putar) agar putaran piringan stabil sebanding daya aktif P.",
-        material: "Paduan AlNiCo Berkoersivitas Tinggi",
-        function: "Torsi Redaman Dinamis (Tb = kd·Φm²·ω)",
-        spec: "Dilengkapi Baut Kalibrasi Halus",
+        category: "rotor",
+        name_id: "Magnet Permanen Pengerem",
+        name_en: "Permanent Brake Magnet (C-Type)",
+        tag_id: "Sistem Pengereman",
+        tag_en: "Braking System",
+        desc_id: "Magnet tapal kuda AlNiCo yang menjepit tepi piringan aluminium. Menimbulkan torsi pengereman lawan (Tb ∝ kecepatan putar) agar putaran piringan stabil sebanding daya aktif P.",
+        desc_en: "Horseshoe AlNiCo permanent magnet straddling the disk. Generates opposing eddy current braking torque (Tb ∝ speed) ensuring rotational speed is proportional to active power P.",
+        material_id: "Paduan AlNiCo Berkoersivitas Tinggi",
+        material_en: "High-Coercivity AlNiCo Alloy",
+        function_id: "Torsi Redaman Dinamis (Tb = kd·Φm²·ω)",
+        function_en: "Dynamic Braking Torque (Tb = kd·Φm²·ω)",
+        spec_id: "Dilengkapi Baut Kalibrasi Halus",
+        spec_en: "Fine Calibration Adjusting Screw",
         color: "#dc2626",
         explodeVec: { x: -65, y: -5, z: 35 }
       },
       {
         id: "rotor_disc",
-        name: "Piringan Rotor & Spindel",
-        tag: "Sistem Bergerak",
-        desc: "Piringan aluminium murni tipis pada poros baja vertikal dengan roda gigi cacing di ujung atas. Dilengkapi lubang anti-creep untuk mencegah piringan berputar saat beban nol.",
-        material: "Aluminium 99.5% + Poros Baja Karbon",
-        function: "Menghasilkan Torsi Putar Td ∝ V·I·cos(θ)",
-        spec: "Diameter 92 mm, Dilengkapi Titik Stroboskop",
+        category: "rotor",
+        name_id: "Piringan Rotor & Spindel",
+        name_en: "Aluminum Rotor Disc & Spindle",
+        tag_id: "Sistem Bergerak",
+        tag_en: "Moving System",
+        desc_id: "Piringan aluminium murni tipis pada poros baja vertikal dengan roda gigi cacing di ujung atas. Dilengkapi lubang anti-creep untuk mencegah piringan berputar saat beban nol.",
+        desc_en: "Lightweight aluminum disc mounted on a vertical steel spindle with top worm gear. Includes anti-creep damping holes to prevent no-load rotation.",
+        material_id: "Aluminium 99.5% + Poros Baja Karbon",
+        material_en: "Aluminum 99.5% + Hardened Carbon Steel",
+        function_id: "Menghasilkan Torsi Putar Td ∝ V·I·cos(θ)",
+        function_en: "Generates Driving Torque Td ∝ V·I·cos(θ)",
+        spec_id: "Diameter 92 mm, Titik Stroboskop",
+        spec_en: "Dia 92 mm, Stroboscopic Index Mark",
         color: "#004FBD",
         explodeVec: { x: 0, y: 0, z: 25 }
       },
       {
         id: "bearings",
-        name: "Bantalan Safir (Jewel Bearing)",
-        tag: "Sistem Tumpuan",
-        desc: "Bantalan mangkok batu safir sintetis di ujung bawah dan pin pemandu di atas, meminimalkan torsi gesekan mekanik sekecil mungkin (koefisien gesek μ < 0.002).",
-        material: "Safir Sintetis & Tungsten Karbida",
-        function: "Tumpuan Rendah Gesekan Rotor",
-        spec: "Dilengkapi Pegas Peredam Kejut",
+        category: "rotor",
+        name_id: "Bantalan Safir (Jewel Bearing)",
+        name_en: "Jewel Pivot & Guide Bearings",
+        tag_id: "Sistem Tumpuan",
+        tag_en: "Bearing Support",
+        desc_id: "Bantalan mangkok batu safir sintetis di ujung bawah dan pin pemandu di atas, meminimalkan torsi gesekan mekanik sekecil mungkin (koefisien gesek μ < 0.002).",
+        desc_en: "Synthetic sapphire cup bearing at bottom and brass guide pin at top, reducing mechanical friction torque to the absolute minimum (μ < 0.002).",
+        material_id: "Safir Sintetis & Tungsten Karbida",
+        material_en: "Synthetic Sapphire & Tungsten Carbide",
+        function_id: "Tumpuan Rendah Gesekan Rotor",
+        function_en: "Ultra-Low Friction Spindle Pivot",
+        spec_id: "Dilengkapi Pegas Peredam Kejut",
+        spec_en: "Shock-Absorbing Spring Loaded Pivot",
         color: "#9ADD67",
         explodeVec: { x: 0, y: -45, z: 20 }
       },
       {
         id: "voltage_coil",
-        name: "Kumparan Tegangan (Shunt)",
-        tag: "Sistem Penggerak",
-        desc: "Inti besi laminasi silikon berbentuk huruf E dengan ribuan lilitan kawat tembaga halus berimpedansi tinggi, menghasilkan fluks shunt yang tertinggal 90° terhadap tegangan jala.",
-        material: "Laminasi Silikon Steel + Kawat Cu 0.08mm",
-        function: "Menghasilkan Fluks Shunt Φp ∝ Tegangan V",
-        spec: "Nominal 220V AC, Induktansi Tinggi",
+        category: "drive",
+        name_id: "Kumparan Tegangan (Shunt)",
+        name_en: "Voltage Element (Shunt Coil)",
+        tag_id: "Sistem Penggerak",
+        tag_en: "Driving System",
+        desc_id: "Inti besi laminasi silikon berbentuk huruf E dengan ribuan lilitan kawat tembaga halus berimpedansi tinggi, menghasilkan fluks shunt yang tertinggal 90° terhadap tegangan jala.",
+        desc_en: "E-shaped laminated silicon steel core wound with thousands of turns of fine copper wire, producing shunt magnetic flux lagging 90° behind supply voltage.",
+        material_id: "Laminasi Silikon Steel + Kawat Cu 0.08mm",
+        material_en: "Silicon Steel Core + 0.08mm Cu Wire",
+        function_id: "Menghasilkan Fluks Shunt Φp ∝ Tegangan V",
+        function_en: "Produces Shunt Flux Φp ∝ Voltage V",
+        spec_id: "Nominal 220V AC, Induktansi Tinggi",
+        spec_en: "Rated 220V AC, High Inductance",
         color: "#004FBD",
         explodeVec: { x: 0, y: 35, z: -15 }
       },
       {
         id: "current_coil",
-        name: "Kumparan Arus (Series)",
-        tag: "Sistem Penggerak",
-        desc: "Inti besi berbentuk U dengan sedikit lilitan kawat tembaga tebal penampang besar yang dipasang seri dengan beban, menghasilkan fluks magnet sefasa dengan arus beban.",
-        material: "Tembaga Batang Tebal (Kabel 4-6 mm²)",
-        function: "Menghasilkan Fluks Seri Φs ∝ Arus Beban I",
-        spec: "Arus Nominal 5A (Maksimum 20A)",
+        category: "drive",
+        name_id: "Kumparan Arus (Series)",
+        name_en: "Current Element (Series Coil)",
+        tag_id: "Sistem Penggerak",
+        tag_en: "Driving System",
+        desc_id: "Inti besi berbentuk U dengan sedikit lilitan kawat tembaga tebal penampang besar yang dipasang seri dengan beban, menghasilkan fluks magnet sefasa dengan arus beban.",
+        desc_en: "U-shaped laminated core wound with few turns of heavy copper wire connected in series with the load, producing magnetic flux in-phase with load current.",
+        material_id: "Tembaga Batang Tebal (Kabel 4-6 mm²)",
+        material_en: "Heavy Copper Bar (4-6 mm² conductors)",
+        function_id: "Menghasilkan Fluks Seri Φs ∝ Arus Beban I",
+        function_en: "Produces Series Flux Φs ∝ Load Current I",
+        spec_id: "Arus Nominal 5A (Maksimum 20A)",
+        spec_en: "Rated 5A (Max 20A Continuous)",
         color: "#FFF100",
         explodeVec: { x: 0, y: -25, z: -15 }
       },
       {
         id: "terminal_block",
-        name: "Blok Terminal & Terminal Lug",
-        tag: "Koneksi Kelistrikan",
-        desc: "Blok isolator fenolik kokoh dengan 4 baut jepit kuningan masif: Fasa Masuk (1), Fasa Beban (2), Netral Masuk (3), dan Netral Beban (4).",
-        material: "Bakelit Isolasi Tinggi & Kuningan Padat",
-        function: "Titik Terminasi Kabel PLN & Beban Pelanggan",
-        spec: "Baut Penjepit M6, Tegangan Isolasi 600V",
+        category: "drive",
+        name_id: "Blok Terminal & Terminal Lug",
+        name_en: "Terminal Block & Brass Lugs",
+        tag_id: "Koneksi Kelistrikan",
+        tag_en: "Electrical Termination",
+        desc_id: "Blok isolator fenolik kokoh dengan 4 baut jepit kuningan masif: Fasa Masuk (1), Fasa Beban (2), Netral Masuk (3), dan Netral Beban (4).",
+        desc_en: "Heavy-duty insulating block with 4 solid brass screw terminals: Line In (1), Line Out (2), Neutral In (3), and Neutral Out (4).",
+        material_id: "Bakelit Isolasi Tinggi & Kuningan Padat",
+        material_en: "Phenolic Bakelite & Solid Brass Lugs",
+        function_id: "Titik Terminasi Kabel PLN & Beban Pelanggan",
+        function_en: "Mains & Customer Load Service Wiring",
+        spec_id: "Baut Penjepit M6, Tegangan Isolasi 600V",
+        spec_en: "M6 Clamping Screws, 600V Insulation",
         color: "#eab308",
         explodeVec: { x: 0, y: -80, z: 15 }
       },
       {
         id: "terminal_cover",
-        name: "Tutup Terminal & Segel PLN",
-        tag: "Anti-Tamper Enclosure",
-        desc: "Tutup pelindung bagian bawah terminal dengan lubang kawat segel timah tera metrologi/PLN untuk mencegah manipulasi atau pencurian listrik pada sambungan kabel.",
-        material: "Bakelit Tahan Panas & Segel Timah",
-        function: "Mencegah Akses & By-pass Arus Tanpa Izin",
-        spec: "Dilengkapi Lubang Kawat Segel Tera",
+        category: "reg",
+        name_id: "Tutup Terminal & Segel PLN",
+        name_en: "Terminal Shroud & Utility Seal",
+        tag_id: "Anti-Tamper Enclosure",
+        tag_en: "Anti-Tamper Enclosure",
+        desc_id: "Tutup pelindung bagian bawah terminal dengan lubang kawat segel timah tera metrologi/PLN untuk mencegah manipulasi atau pencurian listrik pada sambungan kabel.",
+        desc_en: "Removable bottom shield covering service terminals with tamper-evident utility lead wire seal to prevent unauthorized electricity bypass.",
+        material_id: "Bakelit Tahan Panas & Segel Timah",
+        material_en: "Molded Bakelite & Lead Wire Seal",
+        function_id: "Mencegah Akses & By-pass Arus Tanpa Izin",
+        function_en: "Prevents Unauthorized Current Bypass",
+        spec_id: "Dilengkapi Lubang Kawat Segel Tera",
+        spec_en: "Utility Tamper-Evident Lead Wire Seal",
         color: "#64748b",
         explodeVec: { x: 0, y: -115, z: 75 }
       },
       {
         id: "base_case",
-        name: "Rangka Landasan (Base Chassis)",
-        tag: "Struktur Utama",
-        desc: "Rangka die-cast kokoh sebagai dudukan mekanis seluruh inti elektromagnet, bantalan poros, baut grounding, dan kuping penggantung ke dinding.",
-        material: "Die-Cast Logam / Bakelit Hitam",
-        function: "Fondasi Presisi Mekanisme Meter",
-        spec: "Tumpuan 3 Titik Dinding & Terminal Ground",
+        category: "drive",
+        name_id: "Rangka Landasan (Base Chassis)",
+        name_en: "Main Chassis Base Frame",
+        tag_id: "Struktur Utama",
+        tag_en: "Structural Foundation",
+        desc_id: "Rangka die-cast kokoh sebagai dudukan mekanis seluruh inti elektromagnet, bantalan poros, baut grounding, dan kuping penggantung ke dinding.",
+        desc_en: "Rigid die-cast base frame providing solid mounting for electromagnetic cores, bearings, grounding terminal, and wall-mounting ears.",
+        material_id: "Die-Cast Logam / Bakelit Hitam",
+        material_en: "Die-Cast Metal / Phenolic Bakelite",
+        function_id: "Fondasi Presisi Mekanisme Meter",
+        function_en: "Mechanical Foundation & Alignment",
+        spec_id: "Tumpuan 3 Titik Dinding & Terminal Ground",
+        spec_en: "3-Point Wall Mount, Earth Ground",
         color: "#1e293b",
         explodeVec: { x: 0, y: 0, z: -50 }
       }
@@ -630,7 +758,7 @@
     // --- 2. THREE.JS BRIGHT STUDIO ENVIRONMENT ---
     const container = document.getElementById("canvas-container");
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf8fafc); // Bright clean TTPL background
+    scene.background = new THREE.Color(0xf8fafc);
     scene.fog = new THREE.FogExp2(0xf8fafc, 0.0012);
 
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
@@ -652,7 +780,7 @@
     controls.minDistance = 60;
     controls.target.set(0, -5, 0);
 
-    // --- 3. BRIGHT STUDIO LIGHTING ---
+    // --- 3. LIGHTING ---
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
     scene.add(ambientLight);
 
@@ -664,17 +792,14 @@
     mainKeyLight.shadow.bias = -0.0004;
     scene.add(mainKeyLight);
 
-    // TTPL Blue fill light
     const ttplBlueFill = new THREE.DirectionalLight(0x004FBD, 0.45);
     ttplBlueFill.position.set(-140, 80, 80);
     scene.add(ttplBlueFill);
 
-    // Rim lighting for edge clarity
     const rimLight = new THREE.DirectionalLight(0xffffff, 0.6);
     rimLight.position.set(0, -100, -120);
     scene.add(rimLight);
 
-    // Clean Studio Shadow Catch Floor
     const shadowPlaneGeom = new THREE.PlaneGeometry(500, 500);
     const shadowPlaneMat = new THREE.ShadowMaterial({ opacity: 0.12 });
     const shadowPlane = new THREE.Mesh(shadowPlaneGeom, shadowPlaneMat);
@@ -683,19 +808,17 @@
     shadowPlane.receiveShadow = true;
     scene.add(shadowPlane);
 
-    // Subtle TTPL Grid Helper
     const grid = new THREE.GridHelper(360, 36, 0xcbd5e1, 0xe2e8f0);
     grid.position.y = -95;
     scene.add(grid);
 
-    // --- 4. PROCEDURAL 3D METER MODEL CREATION ---
+    // --- 4. 3D MODELS ---
     const meterAssembly = new THREE.Group();
     scene.add(meterAssembly);
 
     const partsMap = new Map();
     let coverMeshRef = null;
 
-    // Materials Library
     const mats = {
       baseBakelite: new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.65, metalness: 0.15 }),
       chassisBracket: new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.4, metalness: 0.5 }),
@@ -721,28 +844,23 @@
       })
     };
 
-    // Canvas Dial Nameplate with Indonesian PLN / TTPL Standards
     function createDialPlateTexture() {
       const canvas = document.createElement("canvas");
       canvas.width = 1024;
       canvas.height = 1024;
       const ctx = canvas.getContext("2d");
 
-      // Clean white plate
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, 1024, 1024);
 
-      // Border with TTPL Blue (#004FBD)
       ctx.strokeStyle = "#004FBD";
       ctx.lineWidth = 14;
       ctx.strokeRect(32, 32, 960, 960);
 
-      // Inner subtle border
       ctx.strokeStyle = "#e2e8f0";
       ctx.lineWidth = 4;
       ctx.strokeRect(58, 58, 908, 908);
 
-      // Institution Name
       ctx.fillStyle = "#0f2744";
       ctx.font = "bold 38px sans-serif";
       ctx.textAlign = "center";
@@ -750,21 +868,18 @@
 
       ctx.font = "bold 28px sans-serif";
       ctx.fillStyle = "#004FBD";
-      ctx.fillText("LABORATORIUM TTPL FTUI • TIPE DD862", 512, 180);
+      ctx.fillText("TIPE DD862 • INDUCTION WATTHOUR METER", 512, 180);
 
-      // Register Cutout Frame
       ctx.fillStyle = "#0f2744";
       ctx.fillRect(250, 240, 524, 124);
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(260, 250, 504, 104);
 
-      // kWh Unit label
       ctx.fillStyle = "#0f2744";
       ctx.font = "bold 40px sans-serif";
       ctx.textAlign = "right";
       ctx.fillText("kWh", 840, 320);
 
-      // Ratings & Specifications (Pure Black #000000 font)
       ctx.fillStyle = "#000000";
       ctx.font = "bold 32px sans-serif";
       ctx.textAlign = "left";
@@ -774,10 +889,9 @@
 
       ctx.textAlign = "right";
       ctx.fillText("900 r/kWh", 884, 440);
-      ctx.fillText("Kelas 2.0", 884, 495);
-      ctx.fillText("SPLN D3.003", 884, 550);
+      ctx.fillText("Class 2.0", 884, 495);
+      ctx.fillText("IEC 62053-11", 884, 550);
 
-      // Rotation Indicator Window Box
       ctx.fillStyle = "#0f2744";
       ctx.fillRect(360, 620, 304, 48);
       ctx.fillStyle = "#ffffff";
@@ -786,9 +900,8 @@
       ctx.fillStyle = "#004FBD";
       ctx.font = "bold 22px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("◄ INDIKATOR PUTARAN PIRINGAN ►", 512, 705);
+      ctx.fillText("◄ ROTOR ROTATION INDICATOR ►", 512, 705);
 
-      // Anti-Tamper Barcode
       ctx.fillStyle = "#000000";
       for (let i = 0; i < 44; i++) {
         const x = 300 + i * 10;
@@ -798,7 +911,6 @@
       ctx.font = "bold 24px monospace";
       ctx.fillText("NO. SERI: TTPL-2026-004FBD", 512, 850);
 
-      // Wiring diagram indicator
       ctx.strokeStyle = "#cbd5e1";
       ctx.lineWidth = 3;
       ctx.strokeRect(360, 890, 304, 42);
@@ -817,7 +929,6 @@
       metalness: 0.1
     });
 
-    // Drum Digit Texture Generator
     function createDrumTexture(num, isRed = false) {
       const c = document.createElement("canvas");
       c.width = 128;
@@ -833,9 +944,7 @@
       return new THREE.CanvasTexture(c);
     }
 
-    // --- ASSEMBLE 3D COMPONENTS ---
-
-    // 1. BASE CHASSIS
+    // Assembly Groups
     const groupBase = new THREE.Group();
     {
       const backPlate = new THREE.Mesh(new THREE.BoxGeometry(94, 126, 14), mats.baseBakelite);
@@ -856,7 +965,6 @@
       rimSidesR.position.set(47, 0, -2);
       groupBase.add(rimSidesR);
 
-      // Wall mounting ear
       const topEar = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 6, 24), mats.chassisBracket);
       topEar.rotation.x = Math.PI / 2;
       topEar.position.set(0, 72, -10);
@@ -870,7 +978,6 @@
       });
     }
 
-    // 2. TERMINAL BLOCK & BRASS LUGS
     const groupTerminals = new THREE.Group();
     {
       const block = new THREE.Mesh(new THREE.BoxGeometry(86, 28, 28), mats.baseBakelite);
@@ -894,7 +1001,6 @@
       });
     }
 
-    // 3. VOLTAGE ELEMENT (SHUNT ELECTROMAGNET)
     const groupVoltageCoil = new THREE.Group();
     {
       const eCoreTop = new THREE.Mesh(new THREE.BoxGeometry(60, 10, 20), mats.siliconCore);
@@ -917,14 +1023,12 @@
       coil.castShadow = true;
       groupVoltageCoil.add(coil);
 
-      // Shading ring
       const shadingBand = new THREE.Mesh(new THREE.TorusGeometry(12, 1.8, 12, 24), mats.copperCurrentBar);
       shadingBand.position.set(0, 16, 4);
       shadingBand.rotation.x = Math.PI / 2;
       groupVoltageCoil.add(shadingBand);
     }
 
-    // 4. CURRENT ELEMENT (SERIES ELECTROMAGNET)
     const groupCurrentCoil = new THREE.Group();
     {
       const uBase = new THREE.Mesh(new THREE.BoxGeometry(50, 8, 18), mats.siliconCore);
@@ -943,7 +1047,6 @@
       });
     }
 
-    // 5. MOVING ROTOR SYSTEM
     const groupRotor = new THREE.Group();
     let rotorDiscMesh = null;
     {
@@ -962,12 +1065,10 @@
       rotorDiscMesh.castShadow = true;
       groupRotor.add(rotorDiscMesh);
 
-      // Stroboscopic marker
       const marker = new THREE.Mesh(new THREE.BoxGeometry(6, 1.8, 10), new THREE.MeshBasicMaterial({ color: 0x004FBD }));
       marker.position.set(0, 2, 54);
       groupRotor.add(marker);
 
-      // Anti-creep holes
       [Math.PI / 2, -Math.PI / 2].forEach(angle => {
         const hole = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, 2.2, 12), mats.baseBakelite);
         hole.position.set(Math.cos(angle) * 26, 2, 22 + Math.sin(angle) * 26);
@@ -975,7 +1076,6 @@
       });
     }
 
-    // 6. PERMANENT BRAKING MAGNET
     const groupBrakeMagnet = new THREE.Group();
     {
       const cBack = new THREE.Mesh(new THREE.BoxGeometry(14, 34, 16), mats.magnetRed);
@@ -1005,7 +1105,6 @@
       groupBrakeMagnet.add(calibScrew);
     }
 
-    // 7. JEWEL BEARINGS & SUPPORT BRACKETS
     const groupBearings = new THREE.Group();
     {
       const btmCup = new THREE.Mesh(new THREE.CylinderGeometry(5, 4, 14, 16), mats.brassLug);
@@ -1021,7 +1120,6 @@
       groupBearings.add(bridge);
     }
 
-    // 8. CYCLOMETER GEAR REGISTER
     const groupRegister = new THREE.Group();
     {
       [-26, 26].forEach(x => {
@@ -1055,7 +1153,6 @@
       groupRegister.add(wormGear);
     }
 
-    // 9. DIAL FACEPLATE / NAMEPLATE
     const groupDialPlate = new THREE.Group();
     {
       const plate = new THREE.Mesh(new THREE.BoxGeometry(86, 116, 2), mats.dialPlate);
@@ -1071,7 +1168,6 @@
       });
     }
 
-    // 10. TRANSPARENT FRONT COVER
     const groupFrontCover = new THREE.Group();
     {
       const cover = new THREE.Mesh(new THREE.BoxGeometry(94, 128, 44), mats.glassCover);
@@ -1091,7 +1187,6 @@
       });
     }
 
-    // 11. TERMINAL SHROUD COVER
     const groupTerminalCover = new THREE.Group();
     {
       const shroud = new THREE.Mesh(new THREE.BoxGeometry(90, 36, 32), mats.baseBakelite);
@@ -1109,7 +1204,6 @@
       groupTerminalCover.add(leadSeal);
     }
 
-    // Register all Assemblies
     const PART_GROUPS = [
       { id: "cover_front", group: groupFrontCover },
       { id: "dial_plate", group: groupDialPlate },
@@ -1141,101 +1235,45 @@
       meterAssembly.add(item.group);
     });
 
-    // --- 5. UI INTERACTIONS (TTPL DESIGN SYSTEM) ---
+    // --- 5. UI INTERACTIONS, LANGUAGE TOGGLE & FILTER LOGIC ---
     const partListContainer = document.getElementById("part-list-container");
-    COMPONENTS.forEach(comp => {
-      const item = document.createElement("div");
-      item.className = "part-item";
-      item.dataset.id = comp.id;
-      item.innerHTML = `
-        <span class="part-color-dot" style="background: ${comp.color}"></span>
-        <span>${comp.name}</span>
-      `;
-      item.addEventListener("click", () => selectComponent(comp.id));
-      partListContainer.appendChild(item);
-    });
 
-    let currentExplodeFactor = 0;
-    const slider = document.getElementById("explode-slider");
-    const pctLabel = document.getElementById("explode-pct");
-
-    function setExplosion(val) {
-      currentExplodeFactor = THREE.MathUtils.clamp(val, 0, 1);
-      const pct = Math.round(currentExplodeFactor * 100);
-      slider.value = pct;
-      pctLabel.textContent = `${pct}%`;
-
-      // Update slider track gradient fill with TTPL Blue (#004FBD)
-      slider.style.background = `linear-gradient(to right, #004FBD 0%, #004FBD ${pct}%, #e2e8f0 ${pct}%, #e2e8f0 100%)`;
-
-      partsMap.forEach((grp) => {
-        const init = grp.userData.initialPos;
-        const vec = grp.userData.explodeVec;
-        grp.position.x = init.x + vec.x * currentExplodeFactor;
-        grp.position.y = init.y + vec.y * currentExplodeFactor;
-        grp.position.z = init.z + vec.z * currentExplodeFactor;
+    function renderPartList() {
+      partListContainer.innerHTML = "";
+      COMPONENTS.forEach(comp => {
+        const item = document.createElement("div");
+        item.className = "part-item";
+        item.dataset.id = comp.id;
+        const displayName = (currentLang === 'en') ? comp.name_en : comp.name_id;
+        item.innerHTML = `
+          <span class="part-color-dot" style="background: ${comp.color}"></span>
+          <span>${displayName}</span>
+        `;
+        item.addEventListener("click", () => selectComponent(comp.id));
+        partListContainer.appendChild(item);
       });
     }
+    renderPartList();
 
-    slider.addEventListener("input", (e) => {
-      isAutoExploding = false;
-      btnAnimate.classList.remove("active");
-      animText.textContent = "Auto Explode";
-      setExplosion(parseFloat(e.target.value) / 100);
-    });
-
-    // Auto Explode Mode
-    let isAutoExploding = false;
-    let animDirection = 1;
-    const btnAnimate = document.getElementById("btn-animate");
-    const animText = document.getElementById("anim-text");
-
-    btnAnimate.addEventListener("click", () => {
-      isAutoExploding = !isAutoExploding;
-      btnAnimate.classList.toggle("active", isAutoExploding);
-      animText.textContent = isAutoExploding ? "Jeda" : "Auto Explode";
-    });
-
-    // X-Ray Mode
-    let isXRay = false;
-    const btnXRay = document.getElementById("btn-xray");
-    btnXRay.addEventListener("click", () => {
-      isXRay = !isXRay;
-      btnXRay.classList.toggle("active", isXRay);
-      if (coverMeshRef) {
-        coverMeshRef.material.opacity = isXRay ? 0.06 : 0.32;
-      }
-    });
-
-    // Reset View
-    document.getElementById("btn-reset").addEventListener("click", () => {
-      setExplosion(0);
-      isAutoExploding = false;
-      btnAnimate.classList.remove("active");
-      animText.textContent = "Auto Explode";
-      camera.position.set(130, 80, 240);
-      controls.target.set(0, -5, 0);
-      controls.update();
-      selectComponent("cover_front");
-    });
-
-    // Component Inspection Details
+    let currentSelectedId = "cover_front";
     function selectComponent(id) {
+      currentSelectedId = id;
       const data = COMPONENTS.find(c => c.id === id);
       if (!data) return;
 
-      document.getElementById("info-name").textContent = data.name;
-      document.getElementById("info-tag").textContent = data.tag;
-      document.getElementById("info-desc").textContent = data.desc;
-      document.getElementById("info-material").textContent = data.material;
-      document.getElementById("info-func").textContent = data.function;
-      document.getElementById("info-spec").textContent = data.spec;
+      const isEn = (currentLang === 'en');
+      document.getElementById("info-name").textContent = isEn ? data.name_en : data.name_id;
+      document.getElementById("info-tag").textContent = isEn ? data.tag_en : data.tag_id;
+      document.getElementById("info-desc").textContent = isEn ? data.desc_en : data.desc_id;
+      document.getElementById("info-material").textContent = isEn ? data.material_en : data.material_id;
+      document.getElementById("info-func").textContent = isEn ? data.function_en : data.function_id;
+      document.getElementById("info-spec").textContent = isEn ? data.spec_en : data.spec_id;
 
       document.querySelectorAll(".part-item").forEach(el => {
         el.classList.toggle("active", el.dataset.id === id);
       });
 
-      // Emissive pulse on selected component in TTPL Blue (#004FBD)
+      // Emissive blue highlight
       partsMap.forEach((grp, gid) => {
         grp.traverse(child => {
           if (child.isMesh && child.material && child.material.emissive) {
@@ -1251,7 +1289,152 @@
       });
     }
 
-    // Raycaster for 3D Click
+    // Interactive Language Switcher Toggle (ID / EN)
+    const btnLang = document.getElementById("hdr-btn-lang");
+    const tagId = document.getElementById("lang-tag-id");
+    const tagEn = document.getElementById("lang-tag-en");
+
+    btnLang.addEventListener("click", () => {
+      currentLang = (currentLang === 'id') ? 'en' : 'id';
+      applyLanguage();
+    });
+
+    function applyLanguage() {
+      const isEn = (currentLang === 'en');
+
+      // Update Header Lang Button Visual State
+      if (isEn) {
+        tagId.className = "";
+        tagEn.className = "lang-active-tag";
+      } else {
+        tagId.className = "lang-active-tag";
+        tagEn.className = "";
+      }
+
+      // Update Header View Buttons
+      document.getElementById("hdr-btn-view-all").textContent = isEn ? "All Assemblies" : "Semua Bagian";
+      document.getElementById("hdr-btn-view-drive").textContent = isEn ? "Driving System" : "Sistem Penggerak";
+      document.getElementById("hdr-btn-view-rotor").textContent = isEn ? "Rotor & Braking" : "Rotor & Pengerem";
+      document.getElementById("hdr-btn-view-reg").textContent = isEn ? "Register & Cover" : "Register & Cover";
+
+      // Update Left Toolbar Labels
+      document.getElementById("txt-parts-title").textContent = isEn ? "Component Directory" : "Daftar Komponen";
+      document.getElementById("txt-parts-count").textContent = isEn ? "11 Assemblies" : "11 Bagian";
+
+      // Update Right Info Card Labels
+      document.getElementById("lbl-info-mat").textContent = isEn ? "Material:" : "Material:";
+      document.getElementById("lbl-info-func").textContent = isEn ? "Function:" : "Fungsi:";
+      document.getElementById("lbl-info-spec").textContent = isEn ? "Specification:" : "Spesifikasi:";
+
+      // Update Hint & Slider Labels
+      document.getElementById("lbl-slider-title").textContent = isEn ? "Disassembly Separation (Exploded View)" : "Tingkat Pemisahan (Exploded View)";
+      document.getElementById("txt-hint").textContent = isEn ?
+        "Left Click: Rotate 360° | Right Click: Pan | Scroll: Zoom | Click Any Part to Inspect" :
+        "Klik Kiri: Putar 360° | Klik Kanan: Geser | Scroll: Zoom | Klik Komponen untuk Detail";
+
+      // Update Bottom Action Buttons
+      document.getElementById("anim-text").textContent = isAutoExploding ? (isEn ? "Pause" : "Jeda") : "Auto Explode";
+      document.getElementById("btn-reset").textContent = isEn ? "Reset View" : "Reset Sudut";
+      document.getElementById("btn-export-text").textContent = isEn ? "Download GLB" : "Unduh GLB";
+
+      renderPartList();
+      selectComponent(currentSelectedId);
+    }
+
+    // View Switcher Filter Tabs
+    const viewButtons = [
+      document.getElementById("hdr-btn-view-all"),
+      document.getElementById("hdr-btn-view-drive"),
+      document.getElementById("hdr-btn-view-rotor"),
+      document.getElementById("hdr-btn-view-reg")
+    ];
+
+    function filterView(mode) {
+      viewButtons.forEach((b, idx) => {
+        b.classList.toggle("active", (mode === 'all' && idx === 0) || (mode === 'drive' && idx === 1) || (mode === 'rotor' && idx === 2) || (mode === 'reg' && idx === 3));
+      });
+
+      if (mode === 'all') {
+        selectComponent("cover_front");
+        setExplosion(0.35);
+      } else if (mode === 'drive') {
+        selectComponent("voltage_coil");
+        setExplosion(0.65);
+      } else if (mode === 'rotor') {
+        selectComponent("rotor_disc");
+        setExplosion(0.5);
+      } else if (mode === 'reg') {
+        selectComponent("cyclometer");
+        setExplosion(0.4);
+      }
+    }
+
+    viewButtons[0].addEventListener("click", () => filterView('all'));
+    viewButtons[1].addEventListener("click", () => filterView('drive'));
+    viewButtons[2].addEventListener("click", () => filterView('rotor'));
+    viewButtons[3].addEventListener("click", () => filterView('reg'));
+
+    // Explode Slider Logic
+    let currentExplodeFactor = 0;
+    const slider = document.getElementById("explode-slider");
+    const pctLabel = document.getElementById("explode-pct");
+
+    function setExplosion(val) {
+      currentExplodeFactor = THREE.MathUtils.clamp(val, 0, 1);
+      const pct = Math.round(currentExplodeFactor * 100);
+      slider.value = pct;
+      pctLabel.textContent = `${pct}%`;
+      slider.style.background = `linear-gradient(to right, #004FBD 0%, #004FBD ${pct}%, #e2e8f0 ${pct}%, #e2e8f0 100%)`;
+
+      partsMap.forEach((grp) => {
+        const init = grp.userData.initialPos;
+        const vec = grp.userData.explodeVec;
+        grp.position.x = init.x + vec.x * currentExplodeFactor;
+        grp.position.y = init.y + vec.y * currentExplodeFactor;
+        grp.position.z = init.z + vec.z * currentExplodeFactor;
+      });
+    }
+
+    slider.addEventListener("input", (e) => {
+      isAutoExploding = false;
+      btnAnimate.classList.remove("active");
+      document.getElementById("anim-text").textContent = "Auto Explode";
+      setExplosion(parseFloat(e.target.value) / 100);
+    });
+
+    let isAutoExploding = false;
+    let animDirection = 1;
+    const btnAnimate = document.getElementById("btn-animate");
+    const animText = document.getElementById("anim-text");
+
+    btnAnimate.addEventListener("click", () => {
+      isAutoExploding = !isAutoExploding;
+      btnAnimate.classList.toggle("active", isAutoExploding);
+      animText.textContent = isAutoExploding ? (currentLang === 'en' ? "Pause" : "Jeda") : "Auto Explode";
+    });
+
+    let isXRay = false;
+    const btnXRay = document.getElementById("btn-xray");
+    btnXRay.addEventListener("click", () => {
+      isXRay = !isXRay;
+      btnXRay.classList.toggle("active", isXRay);
+      if (coverMeshRef) {
+        coverMeshRef.material.opacity = isXRay ? 0.06 : 0.32;
+      }
+    });
+
+    document.getElementById("btn-reset").addEventListener("click", () => {
+      setExplosion(0);
+      isAutoExploding = false;
+      btnAnimate.classList.remove("active");
+      animText.textContent = "Auto Explode";
+      camera.position.set(130, 80, 240);
+      controls.target.set(0, -5, 0);
+      controls.update();
+      selectComponent("cover_front");
+    });
+
+    // Raycast Pointer Click
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
@@ -1287,7 +1470,7 @@
           const blob = new Blob([gltf], { type: "application/octet-stream" });
           const link = document.createElement("a");
           link.href = URL.createObjectURL(blob);
-          link.download = "kwh_meter_ttpl_model.glb";
+          link.download = "kwh_meter_exploded_model.glb";
           link.click();
           URL.revokeObjectURL(link.href);
           setExplosion(prevFactor);
@@ -1303,12 +1486,10 @@
       requestAnimationFrame(animate);
       const delta = clock.getDelta();
 
-      // Rotor disc continuous rotation
       if (rotorDiscMesh) {
         rotorDiscMesh.rotation.y += delta * 0.8;
       }
 
-      // Auto Explode Oscillation
       if (isAutoExploding) {
         let nextVal = currentExplodeFactor + delta * 0.22 * animDirection;
         if (nextVal >= 1.0) {
