@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Earth Tester 3D - Fall of Potential Method (TTPL FTUI)</title>
+  <style>
+    /* ==========================================================================
+       STANDAR GAYA & TEMA TTPL:
+       - Biru Utama: #004FBD
+       - Kuning Murni: #FFF100
+       - Hijau Limau: #9ADD67
+       - Seluruh Font: Hitam (#000000) / Navy (#0f2744)
+       - Card: #ffffff dengan shadow 0 4px 20px rgba(0,0,0,0.04), border 1px solid rgba(0,0,0,0.06)
+       ========================================================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #f8fafc;
+      color: #000000;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+    /* Global Navigation Bar & Mode Switcher (Matching TTPL Header) */
+    .header-bar {
+      position: absolute;
+      top: 14px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.06);
+      box-sizing: border-box;
+      z-index: 10;
+    }
+
+    .pill-badge {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 15pt;
+      font-weight: bold;
+      letter-spacing: -0.02em;
+      color: #0f2744;
+      background: linear-gradient(135deg, #dbeafe 0%, #ccfbf1 50%, #fef9c3 100%);
+      padding: 7px 20px 7px 14px;
+      border-radius: 9999px;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 10px;
+      white-space: nowrap !important;
+      line-height: 1.2;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 8px 20px -4px rgba(14, 165, 233, 0.15), 0 3px 6px -2px rgba(15, 23, 42, 0.04), inset 0 1.5px 2px rgba(255, 255, 255, 0.9);
+      margin: 0;
+    }
+
+    .pill-svg {
+      width: 34px !important;
+      height: 18px !important;
+      min-width: 34px !important;
+      max-width: 34px !important;
+      min-height: 18px !important;
+      max-height: 18px !important;
+      display: inline-block !important;
+      vertical-align: middle !important;
+      margin: 0 !important;
+      overflow: hidden !important;
+      flex-shrink: 0 !important;
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%) !important;
+      mask-image: linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%) !important;
+    }
+
+    .hdr-tabs-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+    }
+
+    .hdr-nav-btn {
+      border: none;
+      background: transparent;
+      color: #000000;
+      padding: 6px 12px;
+      border-radius: 7px;
+      font-weight: 800;
+      font-size: 0.76rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .hdr-nav-btn.active {
+      background: #ffffff;
+      color: #000000;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .hdr-lang-btn {
+      border: 1px solid #004FBD;
+      background: rgba(0, 79, 189, 0.08);
+      color: #000000;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .hdr-lang-btn:hover {
+      background: #004FBD;
+      color: #ffffff;
+    }
+
+    .hdr-lang-btn .lang-active-tag {
+      background: #004FBD;
+      color: #ffffff;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+    }
+
+    /* Right Instrument Panel: Digital Earth Tester LCD & Diagnostics */
+    .instrument-card {
+      position: absolute;
+      top: 86px;
+      right: 20px;
+      width: 340px;
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+      padding: 16px 18px;
+      z-index: 10;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .instrument-top-accent {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #9ADD67 0%, #FFF100 50%, #004FBD 100%);
+    }
+
+    .card-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .card-title-row h3 {
+      font-size: 13.5px;
+      font-weight: 900;
+      color: #0f2744;
+      margin: 0;
+    }
+
+    /* Digital LCD Box (Rugged Earth Tester display) */
+    .lcd-display {
+      background: #0a1410;
+      border-radius: 10px;
+      padding: 12px 14px;
+      border: 2px solid #1e293b;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lcd-resistance {
+      font-family: monospace;
+      font-size: 34px;
+      font-weight: 900;
+      color: #34d399;
+      text-shadow: 0 0 10px rgba(52, 211, 153, 0.6);
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+
+    .lcd-sub {
+      font-size: 10.5px;
+      color: #94a3b8;
+      margin-top: 4px;
+      font-family: monospace;
+      letter-spacing: 0.3px;
+    }
+
+    /* Status Badge */
+    .status-badge {
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      text-align: center;
+      color: #ffffff;
+      background: #059669;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: background 0.2s;
+    }
+
+    /* Plateau Flatness Diagnostic Box */
+    .diag-box {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 10px 12px;
+      border: 1px solid #e2e8f0;
+      font-size: 11.5px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .diag-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .diag-label {
+      color: #64748b;
+      font-weight: 700;
+      font-size: 11px;
+    }
+
+    .diag-val {
+      color: #000000;
+      font-weight: 800;
+    }
+
+    /* Fall of Potential Real-time Curve HUD (Top Left Overlay) */
+    .curve-card {
+      position: absolute;
+      top: 86px;
+      left: 20px;
+      width: 360px;
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+      padding: 14px 16px;
+      z-index: 10;
+      overflow: hidden;
+    }
+
+    .curve-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+
+    .curve-title-row span.title {
+      font-size: 12.5px;
+      font-weight: 900;
+      color: #0f2744;
+    }
+
+    .curve-svg-box {
+      position: relative;
+      width: 100%;
+      height: 145px;
+      background: #ffffff;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+    }
+
+    /* Interaction Hint */
+    .interaction-hint {
+      position: absolute;
+      bottom: 112px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #64748b;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      padding: 4px 14px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      pointer-events: none;
+      z-index: 10;
+      white-space: nowrap;
+    }
+
+    /* Bottom Control Bar */
+    .control-panel {
+      position: absolute;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ffffff;
+      border-radius: 18px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      padding: 12px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 10;
+      width: 90%;
+      max-width: 820px;
+    }
+
+    .control-row-sliders {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .slider-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 11.5px;
+      font-weight: 800;
+      color: #000000;
+    }
+
+    .slider-header span.val-tag {
+      font-size: 11.5px;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    .tag-blue {
+      background: rgba(0, 79, 189, 0.08);
+      color: #004FBD;
+      border: 1px solid rgba(0, 79, 189, 0.25);
+    }
+
+    .tag-yellow {
+      background: rgba(255, 241, 0, 0.3);
+      color: #000000;
+      border: 1px solid #eab308;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 7px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      border: 1px solid #cbd5e1;
+      outline: none;
+      cursor: pointer;
+      margin: 3px 0;
+    }
+
+    input.slider-probe::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      background: #FFF100;
+      border: 2px solid #000000;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+
+    input.slider-dist::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      background: #ef4444;
+      border: 2px solid #ffffff;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+
+    .action-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 8px;
+    }
+
+    .quick-jump-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-quick {
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #000000;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-quick:hover {
+      background: #ffffff;
+      border-color: #004FBD;
+      color: #004FBD;
+    }
+
+    .btn-quick.target-618 {
+      background: #9ADD67;
+      color: #0f2744;
+      border-color: #84cc16;
+      box-shadow: 0 1px 4px rgba(154, 221, 103, 0.4);
+    }
+
+    .dropdown-soil {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #000000;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      .curve-card { display: none; }
+      .instrument-card { width: calc(100% - 40px); left: 20px; top: auto; bottom: 140px; }
+      .control-panel { width: calc(100% - 40px); padding: 10px 14px; }
+      .control-row-sliders { flex-direction: column; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 3D WebGL Canvas Viewport -->
+  <div id="canvas-container"></div>
+
+  <!-- Global Header Bar (TTPL Design Standard) -->
+  <div class="header-bar">
+    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+      <div class="pill-badge">
+        <svg class="pill-svg">
+          <path d="M -32 9 Q -28 -2 -24 9 T -16 9 T -8 9 T 0 9 T 8 9 T 16 9 T 24 9 T 32 9 T 40 9 T 48 9 T 56 9 T 64 9"
+            fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round">
+            <animateTransform attributeName="transform" type="translate" from="0,0" to="-16,0" dur="1s" repeatCount="indefinite" />
+          </path>
+        </svg>
+        <span id="nav-badge-title">FALL OF POTENTIAL EARTH TESTING (3-POLE)</span>
+      </div>
+    </div>
+
+    <!-- View Switcher & Language Toggle -->
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+      <div class="hdr-tabs-container">
+        <button id="hdr-btn-hemi" class="hdr-nav-btn active" type="button">Bola Potensial (Hemispheres)</button>
+        <button id="hdr-btn-wires" class="hdr-nav-btn active" type="button">Kabel Alat Uji</button>
+      </div>
+
+      <button id="hdr-btn-lang" class="hdr-lang-btn" type="button" title="Ganti Bahasa / Switch Language">
+        <span id="lang-tag-id" class="lang-active-tag">ID</span>
+        <span>/</span>
+        <span id="lang-tag-en">EN</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Fall-of-Potential Theoretical & Live S-Curve (Top Left HUD) -->
+  <div class="curve-card" id="curve-card">
+    <div class="curve-title-row">
+      <span class="title" id="txt-curve-title">Kurva Fall of Potential R(x)</span>
+      <span style="font-size: 10.5px; font-weight: 800; color: #004FBD;" id="txt-curve-sub">IEEE Std 81</span>
+    </div>
+    <div class="curve-svg-box">
+      <svg id="svg-fop-curve" width="100%" height="100%" viewBox="0 0 330 145" preserveAspectRatio="none">
+        <!-- 52% - 72% Flat Plateau Shaded Zone -->
+        <rect id="svg-plateau-zone" x="171" y="8" width="66" height="114" fill="rgba(154, 221, 103, 0.28)" stroke="#84cc16" stroke-width="1" stroke-dasharray="3,2"></rect>
+        <text id="svg-txt-plateau" x="204" y="19" text-anchor="middle" font-size="7.5" font-weight="800" fill="#0f2744">Zona Datar 61.8%</text>
+
+        <!-- True Ground Resistance Reference Line (Horiz) -->
+        <line id="svg-line-rtrue" x1="15" y1="65" x2="315" y2="65" stroke="#004FBD" stroke-width="1.2" stroke-dasharray="4,3"></line>
+        <text id="svg-txt-rtrue" x="18" y="60" font-size="8" font-weight="800" fill="#004FBD">R_true = 4.28 Ω</text>
+
+        <!-- 61.8% Vertical Rule Line -->
+        <line id="svg-line-618" x1="204" y1="8" x2="204" y2="124" stroke="#059669" stroke-width="1.4" stroke-dasharray="2,2"></line>
+
+        <!-- Axis Lines -->
+        <line x1="20" y1="124" x2="315" y2="124" stroke="#cbd5e1" stroke-width="1.2"></line>
+        <line x1="20" y1="8" x2="20" y2="124" stroke="#cbd5e1" stroke-width="1.2"></line>
+        <text x="315" y="136" text-anchor="end" font-size="7.5" font-weight="700" fill="#64748b">Jarak x (m)</text>
+        <text x="20" y="136" text-anchor="start" font-size="7.5" font-weight="700" fill="#64748b">0 (E)</text>
+
+        <!-- Theoretical S-Curve Path -->
+        <path id="svg-path-scurve" d="" fill="none" stroke="#004FBD" stroke-width="2.4" stroke-linecap="round"></path>
+
+        <!-- Live Probe Marker Point -->
+        <circle id="svg-marker-live" cx="204" cy="65" r="5" fill="#FFF100" stroke="#000000" stroke-width="2"></circle>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Right Instrument Panel (Earth Tester LCD & Compliance) -->
+  <div class="info-card instrument-card" id="instrument-card">
+    <div class="instrument-top-accent"></div>
+    <div class="card-title-row">
+      <h3 id="txt-tester-title">EARTH TESTER DIGITAL 3-TITIK</h3>
+      <span style="font-size: 10px; font-weight: 800; background: rgba(0, 79, 189, 0.08); color: #004FBD; padding: 2px 6px; border-radius: 4px;">128 Hz AC</span>
+    </div>
+
+    <!-- LCD Display -->
+    <div class="lcd-display">
+      <div class="lcd-resistance" id="lcd-val-r">4.28 Ω</div>
+      <div class="lcd-sub" id="lcd-val-sub">V_EP: 0.11 V | I_test: 25 mA | R_E: 4.28 Ω</div>
+    </div>
+
+    <!-- Standard Compliance Badge -->
+    <div class="status-badge" id="badge-compliance">
+      STATUS: MEMENUHI STANDAR IEEE STD 81 (≤ 5 Ω)
+    </div>
+
+    <!-- Real-time Diagnostics -->
+    <div class="diag-box">
+      <div class="diag-row">
+        <span class="diag-label" id="lbl-diag-pos">Posisi Pasak Potensial P:</span>
+        <span class="diag-val" id="diag-val-pos">x = 24.7 m (61.8% D)</span>
+      </div>
+      <div class="diag-row">
+        <span class="diag-label" id="lbl-diag-true">Tahanan Pentanahan Sejati R_E:</span>
+        <span class="diag-val" id="diag-val-true">4.28 Ω</span>
+      </div>
+      <div class="diag-row">
+        <span class="diag-label" id="lbl-diag-plat">Kemiringan Zona Datar (52-72%):</span>
+        <span class="diag-val" style="color: #059669;" id="diag-val-plat">0.8% (Zona Valid)</span>
+      </div>
+      <div class="diag-row">
+        <span class="diag-label" id="lbl-diag-soil">Resistivitas Tanah (ρ):</span>
+        <span class="diag-val" id="diag-val-rho">85 Ω·m</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interaction Hint -->
+  <div class="interaction-hint" id="txt-hint">Tarik Pasak P (Kuning) di atas tanah 3D atau geser slider | Klik Kiri: Putar Kamera | Scroll: Zoom</div>
+
+  <!-- Bottom Control Panel -->
+  <div class="control-panel">
+    <div class="control-row-sliders">
+      <!-- Potential Probe Distance x Slider -->
+      <div class="slider-item">
+        <div class="slider-header">
+          <span id="lbl-slider-p">Posisi Pasak Potensial P (x dari E)</span>
+          <span class="val-tag tag-yellow" id="tag-probe-val">x = 24.7 m (61.8% D)</span>
+        </div>
+        <input type="range" class="slider-probe" id="range-probe-x" min="1" max="39" step="0.2" value="24.7">
+      </div>
+
+      <!-- Current Probe Distance D Slider -->
+      <div class="slider-item">
+        <div class="slider-header">
+          <span id="lbl-slider-d">Jarak Pasak Arus C (D)</span>
+          <span class="val-tag tag-blue" id="tag-current-val">D = 40.0 m</span>
+        </div>
+        <input type="range" class="slider-dist" id="range-dist-d" min="15" max="80" step="1" value="40">
+      </div>
+    </div>
+
+    <!-- Quick Jump Buttons & Soil Preset -->
+    <div class="action-row">
+      <div class="quick-jump-group">
+        <span style="font-size: 11px; font-weight: 800; color: #64748b;" id="lbl-quick">Lompat Cepat:</span>
+        <button class="btn-quick" id="btn-p52" type="button">52%</button>
+        <button class="btn-quick target-618" id="btn-p618" type="button">61.8% (Golden)</button>
+        <button class="btn-quick" id="btn-p72" type="button">72%</button>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 11px; font-weight: 800; color: #64748b;" id="lbl-soil-select">Karakteristik Tanah:</span>
+        <select class="dropdown-soil" id="select-soil">
+          <option value="25">1. Tanah Rawa / Liat Basah (ρ = 25 Ω·m)</option>
+          <option value="85" selected>2. Tanah Lembap - UI Depok (ρ = 85 Ω·m)</option>
+          <option value="250">3. Pasir Lembap (ρ = 250 Ω·m)</option>
+          <option value="650">4. Pasir Kering & Kerikil (ρ = 650 Ω·m)</option>
+          <option value="1500">5. Tanah Berbatu / Padas (ρ = 1500 Ω·m)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Three.js Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <script>
+    // =========================================================================
+    // 1. STATE & PHYSICAL CONSTANTS (Based on VirtualGroundLab.m & IEEE Std 81)
+    // =========================================================================
+    let currentLang = 'id';
+    let rho = 85;               // Soil resistivity (Ohm.m)
+    let rodLength_E = 2.5;       // Main grounding rod E length (m)
+    let rodRadius_E = 0.008;     // 16mm diameter rod -> 0.008m radius
+    let auxStakeDepth = 0.45;    // Auxiliary spikes depth (m)
+    let auxStakeRadius = 0.006;  // Auxiliary spikes radius (m)
+    let I_test = 0.025;          // Injected test current (25 mA)
+
+    let dist_D = 40.0;           // Distance of current spike C (m)
+    let pos_x = 24.7;            // Distance of potential spike P (m)
+    let showHemispheres = true;
+    let showCables = true;
+
+    // Dwight's Single Vertical Cylinder Ground Resistance
+    function calcTrueGroundResistance(rhoVal, L, a) {
+      return (rhoVal / (2 * Math.PI * L)) * (Math.log(4 * L / a) - 1);
+    }
+
+    // Finite Line-Source Green's Function Potential
+    function rodGreenPotential(r_horiz, z_obs, L_src, a_src, rhoVal) {
+      const r = Math.sqrt(r_horiz * r_horiz + a_src * a_src);
+      const num0 = (L_src - z_obs) + Math.sqrt(r * r + (L_src - z_obs) * (L_src - z_obs));
+      const den0 = (-L_src - z_obs) + Math.sqrt(r * r + (-L_src - z_obs) * (-L_src - z_obs));
+      return (rhoVal / (4 * Math.PI * L_src)) * Math.log(Math.max(num0 / Math.max(den0, 1e-12), 1));
+    }
+
+    // Exact Fall-of-Potential Resistance at distance x
+    function calcFOP(xVal, DVal, rhoVal) {
+      const R_true = calcTrueGroundResistance(rhoVal, rodLength_E, rodRadius_E);
+      // Mutual resistance between E and C
+      const R_m_EC = rodGreenPotential(DVal, -auxStakeDepth / 2, rodLength_E, rodRadius_E, rhoVal);
+      const Phi_E = R_true - R_m_EC;
+
+      // Potential at P due to +I from E
+      const d_EP = Math.max(xVal, rodRadius_E);
+      const Phi_P_from_E = rodGreenPotential(d_EP, -auxStakeDepth / 2, rodLength_E, rodRadius_E, rhoVal);
+
+      // Potential at P due to -I from C
+      const d_CP = Math.max(Math.abs(DVal - xVal), auxStakeRadius);
+      const Phi_P_from_C = rodGreenPotential(d_CP, -auxStakeDepth / 2, auxStakeDepth, auxStakeRadius, rhoVal);
+
+      const Phi_P = Phi_P_from_E - Phi_P_from_C;
+      const R_meas = Math.max(0, Phi_E - Phi_P);
+      return { R_meas, R_true, V_EP: R_meas * I_test };
+    }
+
+    // =========================================================================
+    // 2. THREE.JS 3D SCENE SETUP
+    // =========================================================================
+    const container = document.getElementById("canvas-container");
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf8fafc);
+    scene.fog = new THREE.FogExp2(0xf8fafc, 0.0035);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+    camera.position.set(22, 18, 38);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.maxPolarAngle = Math.PI / 2 - 0.02; // Keep camera above ground
+    controls.minDistance = 8;
+    controls.maxDistance = 140;
+    controls.target.set(20, 0, 0);
+
+    // Studio Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+
+    const sunLight = new THREE.DirectionalLight(0xffffff, 1.25);
+    sunLight.position.set(30, 45, 25);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 2048;
+    sunLight.shadow.mapSize.height = 2048;
+    sunLight.shadow.bias = -0.0005;
+    scene.add(sunLight);
+
+    const blueFill = new THREE.DirectionalLight(0x004FBD, 0.35);
+    blueFill.position.set(-20, 20, -30);
+    scene.add(blueFill);
+
+    // =========================================================================
+    // 3. 3D MODELS: TERRAIN, ELECTRODES, WIRES & TESTER
+    // =========================================================================
+    // Grass Ground Surface
+    const groundGeom = new THREE.PlaneGeometry(160, 60, 32, 16);
+    const groundMat = new THREE.MeshStandardMaterial({
+      color: 0x3b6e22,
+      roughness: 0.85,
+      metalness: 0.05
+    });
+    const ground = new THREE.Mesh(groundGeom, groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.set(40, 0, 0);
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // Linear Measurement Track along X axis
+    const trackGeom = new THREE.PlaneGeometry(100, 2.2);
+    const trackMat = new THREE.MeshStandardMaterial({ color: 0x658d4e, roughness: 0.9 });
+    const track = new THREE.Mesh(trackGeom, trackMat);
+    track.rotation.x = -Math.PI / 2;
+    track.position.set(40, 0.02, 0);
+    scene.add(track);
+
+    // Grid markings along the testing line
+    const testLineGrid = new THREE.GridHelper(100, 50, 0x004FBD, 0x86efac);
+    testLineGrid.position.set(40, 0.03, 0);
+    scene.add(testLineGrid);
+
+    // Materials Library
+    const copperMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.3, metalness: 0.85 });
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.25, metalness: 0.95 });
+    const brassMat = new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.3, metalness: 0.85 });
+    const yellowStakeMat = new THREE.MeshStandardMaterial({ color: 0xFFF100, roughness: 0.4 });
+    const redStakeMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.4 });
+    const testerYellowMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.5 });
+    const testerBlackMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 });
+
+    // --- ELECTRODE E (MAIN GROUND ROD AT X = 0) ---
+    const electrodeE_Group = new THREE.Group();
+    {
+      // Main copper-clad ground rod (penetrating ground)
+      const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 4.0, 16), copperMat);
+      rod.position.y = -1.2;
+      rod.castShadow = true;
+      electrodeE_Group.add(rod);
+
+      // Top brass clamp
+      const clamp = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.3, 0.4), brassMat);
+      clamp.position.y = 0.55;
+      electrodeE_Group.add(clamp);
+
+      // Label flag
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.0), steelMat);
+      pole.position.set(0, 1.3, -0.4);
+      electrodeE_Group.add(pole);
+
+      const flag = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.5, 0.05), new THREE.MeshStandardMaterial({ color: 0x004FBD }));
+      flag.position.set(0.45, 2.1, -0.4);
+      electrodeE_Group.add(flag);
+    }
+    electrodeE_Group.position.set(0, 0, 0);
+    scene.add(electrodeE_Group);
+
+    // --- DRAGGABLE POTENTIAL STAKE P (YELLOW CABLE) ---
+    const stakeP_Group = new THREE.Group();
+    {
+      const stake = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.8, 16), steelMat);
+      stake.position.y = 0.3;
+      stake.castShadow = true;
+      stakeP_Group.add(stake);
+
+      // T-Handle (Yellow)
+      const handle = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.15, 0.15), yellowStakeMat);
+      handle.position.y = 1.15;
+      stakeP_Group.add(handle);
+
+      // Ground highlight disc
+      const disc = new THREE.Mesh(new THREE.RingGeometry(0.4, 0.7, 24), new THREE.MeshBasicMaterial({ color: 0xFFF100, side: THREE.DoubleSide }));
+      disc.rotation.x = -Math.PI / 2;
+      disc.position.y = 0.04;
+      stakeP_Group.add(disc);
+    }
+    stakeP_Group.position.set(pos_x, 0, 0);
+    scene.add(stakeP_Group);
+
+    // --- AUXILIARY CURRENT STAKE C (RED CABLE AT X = D) ---
+    const stakeC_Group = new THREE.Group();
+    {
+      const stake = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.8, 16), steelMat);
+      stake.position.y = 0.3;
+      stake.castShadow = true;
+      stakeC_Group.add(stake);
+
+      // T-Handle (Red)
+      const handle = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.15, 0.15), redStakeMat);
+      handle.position.y = 1.15;
+      stakeC_Group.add(handle);
+
+      const disc = new THREE.Mesh(new THREE.RingGeometry(0.4, 0.7, 24), new THREE.MeshBasicMaterial({ color: 0xef4444, side: THREE.DoubleSide }));
+      disc.rotation.x = -Math.PI / 2;
+      disc.position.y = 0.04;
+      stakeC_Group.add(disc);
+    }
+    stakeC_Group.position.set(dist_D, 0, 0);
+    scene.add(stakeC_Group);
+
+    // --- DIGITAL EARTH TESTER 3D INSTRUMENT BOX ---
+    const testerGroup = new THREE.Group();
+    {
+      // Outer Rugged Case
+      const caseBox = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.2, 1.8), testerYellowMat);
+      caseBox.position.y = 0.6;
+      caseBox.castShadow = true;
+      testerGroup.add(caseBox);
+
+      // Front Faceplate
+      const face = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.1, 1.6), testerBlackMat);
+      face.position.y = 1.21;
+      testerGroup.add(face);
+
+      // Mini LCD
+      const lcd = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.02, 0.55), new THREE.MeshStandardMaterial({ color: 0x0a1410, roughness: 0.2 }));
+      lcd.position.set(0, 1.26, -0.3);
+      testerGroup.add(lcd);
+
+      // 3 Terminals: E (Green), P (Yellow), C (Red)
+      const termE = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.18), new THREE.MeshStandardMaterial({ color: 0x059669 }));
+      termE.position.set(-0.6, 1.28, 0.45);
+      testerGroup.add(termE);
+
+      const termP = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.18), new THREE.MeshStandardMaterial({ color: 0xFFF100 }));
+      termP.position.set(0, 1.28, 0.45);
+      testerGroup.add(termP);
+
+      const termC = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.18), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
+      termC.position.set(0.6, 1.28, 0.45);
+      testerGroup.add(termC);
+    }
+    // Sit near E but slightly offset
+    testerGroup.position.set(2.8, 0, 3.5);
+    scene.add(testerGroup);
+
+    // --- UNDERGROUND EQUIPOTENTIAL HEMISPHERES OF INFLUENCE ---
+    const hemiGroup = new THREE.Group();
+    const hemiMat_E = new THREE.MeshStandardMaterial({
+      color: 0x004FBD,
+      transparent: true,
+      opacity: 0.18,
+      roughness: 0.8,
+      side: THREE.DoubleSide
+    });
+    const hemiMesh_E = new THREE.Mesh(new THREE.SphereGeometry(6.5, 32, 16, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), hemiMat_E);
+    hemiMesh_E.position.set(0, 0, 0);
+    hemiGroup.add(hemiMesh_E);
+
+    const hemiMat_C = new THREE.MeshStandardMaterial({
+      color: 0xef4444,
+      transparent: true,
+      opacity: 0.18,
+      roughness: 0.8,
+      side: THREE.DoubleSide
+    });
+    const hemiMesh_C = new THREE.Mesh(new THREE.SphereGeometry(5.0, 32, 16, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), hemiMat_C);
+    hemiMesh_C.position.set(dist_D, 0, 0);
+    hemiGroup.add(hemiMesh_C);
+
+    scene.add(hemiGroup);
+
+    // --- DYNAMIC CABLES (CATENARY CURVES CONNECTING TESTER TO RODS) ---
+    let cableE_Line = null, cableP_Line = null, cableC_Line = null;
+
+    function createCatenaryCable(pStart, pEnd, colorHex) {
+      const pMid = new THREE.Vector3().addVectors(pStart, pEnd).multiplyScalar(0.5);
+      pMid.y = Math.min(pStart.y, pEnd.y) + 0.15; // hangs near ground
+
+      const curve = new THREE.QuadraticBezierCurve3(pStart, pMid, pEnd);
+      const points = curve.getPoints(24);
+      const geom = new THREE.BufferGeometry().setFromPoints(points);
+      const mat = new THREE.LineBasicMaterial({ color: colorHex, linewidth: 3 });
+      return new THREE.Line(geom, mat);
+    }
+
+    function updateCables() {
+      if (cableE_Line) scene.remove(cableE_Line);
+      if (cableP_Line) scene.remove(cableP_Line);
+      if (cableC_Line) scene.remove(cableC_Line);
+
+      if (!showCables) return;
+
+      const tE = new THREE.Vector3(2.2, 1.25, 3.95);
+      const tP = new THREE.Vector3(2.8, 1.25, 3.95);
+      const tC = new THREE.Vector3(3.4, 1.25, 3.95);
+
+      const targetE = new THREE.Vector3(0, 0.5, 0);
+      const targetP = new THREE.Vector3(pos_x, 0.8, 0);
+      const targetC = new THREE.Vector3(dist_D, 0.8, 0);
+
+      cableE_Line = createCatenaryCable(tE, targetE, 0x059669); // Green to E
+      cableP_Line = createCatenaryCable(tP, targetP, 0xFFF100); // Yellow to P
+      cableC_Line = createCatenaryCable(tC, targetC, 0xef4444); // Red to C
+
+      scene.add(cableE_Line);
+      scene.add(cableP_Line);
+      scene.add(cableC_Line);
+    }
+
+    // =========================================================================
+    // 4. FALL-OF-POTENTIAL S-CURVE HUD RENDERING
+    // =========================================================================
+    const pathSCurve = document.getElementById("svg-path-scurve");
+    const markerLive = document.getElementById("svg-marker-live");
+    const lineRTrue = document.getElementById("svg-line-rtrue");
+    const txtRTrue = document.getElementById("svg-txt-rtrue");
+    const line618 = document.getElementById("svg-line-618");
+    const plateauZone = document.getElementById("svg-plateau-zone");
+
+    function updateFOPCurveHUD() {
+      const R_true = calcTrueGroundResistance(rho, rodLength_E, rodRadius_E);
+      const points = [];
+      const steps = 70;
+      let maxR = R_true * 2.2;
+
+      for (let i = 0; i <= steps; i++) {
+        const u = i / steps;
+        const xVal = Math.max(0.4, Math.min(dist_D - 0.4, u * dist_D));
+        const res = calcFOP(xVal, dist_D, rho).R_meas;
+        if (res > maxR) maxR = res;
+        points.push({ x: xVal, r: res });
+      }
+
+      // SVG dimensions: x=20..315, y=124..15
+      const svgW = 295;
+      const svgH = 109;
+
+      let dStr = "";
+      points.forEach((pt, idx) => {
+        const sx = 20 + (pt.x / dist_D) * svgW;
+        const sy = 124 - (pt.r / maxR) * svgH;
+        dStr += (idx === 0 ? "M " : " L ") + sx.toFixed(1) + " " + sy.toFixed(1);
+      });
+      pathSCurve.setAttribute("d", dStr);
+
+      // True R horizontal line
+      const syTrue = 124 - (R_true / maxR) * svgH;
+      lineRTrue.setAttribute("y1", syTrue.toFixed(1));
+      lineRTrue.setAttribute("y2", syTrue.toFixed(1));
+      txtRTrue.setAttribute("y", (syTrue - 4).toFixed(1));
+      txtRTrue.textContent = `R_true = ${R_true.toFixed(2)} Ω`;
+
+      // 61.8% vertical marker
+      const sx618 = 20 + 0.618 * svgW;
+      line618.setAttribute("x1", sx618.toFixed(1));
+      line618.setAttribute("x2", sx618.toFixed(1));
+
+      // Plateau 52% to 72% Zone Box
+      const sx52 = 20 + 0.52 * svgW;
+      const sx72 = 20 + 0.72 * svgW;
+      plateauZone.setAttribute("x", sx52.toFixed(1));
+      plateauZone.setAttribute("width", (sx72 - sx52).toFixed(1));
+
+      // Live Probe dot
+      const liveCalc = calcFOP(pos_x, dist_D, rho);
+      const liveX = 20 + (pos_x / dist_D) * svgW;
+      const liveY = 124 - (liveCalc.R_meas / maxR) * svgH;
+      markerLive.setAttribute("cx", liveX.toFixed(1));
+      markerLive.setAttribute("cy", liveY.toFixed(1));
+    }
+
+    // =========================================================================
+    // 5. MASTER REFRESH & DIAGNOSTICS UPDATE
+    // =========================================================================
+    const rangeProbe = document.getElementById("range-probe-x");
+    const rangeDist = document.getElementById("range-dist-d");
+    const tagProbeVal = document.getElementById("tag-probe-val");
+    const tagCurrentVal = document.getElementById("tag-current-val");
+
+    const lcdValR = document.getElementById("lcd-val-r");
+    const lcdValSub = document.getElementById("lcd-val-sub");
+    const badgeCompliance = document.getElementById("badge-compliance");
+    const diagValPos = document.getElementById("diag-val-pos");
+    const diagValTrue = document.getElementById("diag-val-true");
+    const diagValPlat = document.getElementById("diag-val-plat");
+    const diagValRho = document.getElementById("diag-val-rho");
+
+    function updateSimulation() {
+      // Keep probe inside [0.5, D - 0.5]
+      rangeProbe.max = (dist_D - 0.5).toFixed(1);
+      pos_x = Math.max(0.5, Math.min(dist_D - 0.5, pos_x));
+      rangeProbe.value = pos_x;
+
+      stakeP_Group.position.x = pos_x;
+      stakeC_Group.position.x = dist_D;
+      hemiMesh_C.position.x = dist_D;
+
+      // Calculations
+      const { R_meas, R_true, V_EP } = calcFOP(pos_x, dist_D, rho);
+      const pctD = ((pos_x / dist_D) * 100).toFixed(1);
+
+      tagProbeVal.textContent = `x = ${pos_x.toFixed(1)} m (${pctD}% D)`;
+      tagCurrentVal.textContent = `D = ${dist_D.toFixed(1)} m`;
+
+      // LCD Display
+      lcdValR.textContent = `${R_meas.toFixed(2)} Ω`;
+      lcdValSub.textContent = `V_EP: ${V_EP.toFixed(2)} V | I_test: 25 mA | R_E: ${R_true.toFixed(2)} Ω`;
+
+      // Plateau 52%-62%-72% Flatness Test (IEEE Std 81)
+      const R_52 = calcFOP(0.52 * dist_D, dist_D, rho).R_meas;
+      const R_62 = calcFOP(0.618 * dist_D, dist_D, rho).R_meas;
+      const R_72 = calcFOP(0.72 * dist_D, dist_D, rho).R_meas;
+      const slopeVar = (100 * Math.abs(R_72 - R_52) / Math.max(2 * R_62, 1e-3)).toFixed(1);
+
+      // Diagnostics values
+      diagValPos.textContent = `x = ${pos_x.toFixed(1)} m (${pctD}% D)`;
+      diagValTrue.textContent = `${R_true.toFixed(2)} Ω`;
+      diagValRho.textContent = `${rho} Ω·m`;
+
+      const isEn = (currentLang === 'en');
+
+      if (parseFloat(slopeVar) <= 5.0) {
+        diagValPlat.textContent = `${slopeVar}% (${isEn ? 'Plateau Valid' : 'Zona Datar Valid'})`;
+        diagValPlat.style.color = "#059669";
+      } else {
+        diagValPlat.textContent = `${slopeVar}% (${isEn ? 'Overlap! Increase D' : 'Tumpang Tindih! Perbesar D'})`;
+        diagValPlat.style.color = "#ef4444";
+      }
+
+      // Compliance standard badge (PLN <= 1 Ohm, IEEE <= 5 Ohm)
+      if (R_meas <= 1.0) {
+        badgeCompliance.textContent = isEn ? "STATUS: MEETS PLN (≤ 1 Ω) & IEEE (≤ 5 Ω) STANDARDS" : "STATUS: LOLOS STANDAR PLN (≤ 1 Ω) & IEEE (≤ 5 Ω)";
+        badgeCompliance.style.background = "#059669";
+      } else if (R_meas <= 5.0) {
+        badgeCompliance.textContent = isEn ? "STATUS: MEETS IEEE STD 81 (≤ 5 Ω) | EXCEEDS PLN (> 1 Ω)" : "STATUS: MEMENUHI IEEE (≤ 5 Ω) | MELEBIHI PLN (> 1 Ω)";
+        badgeCompliance.style.background = "#eab308";
+        badgeCompliance.style.color = "#000000";
+      } else {
+        badgeCompliance.textContent = isEn ? "STATUS: HIGH RESISTANCE (> 5 Ω) - IMPROVE EARTHING!" : "STATUS: TAHANAN TINGGI (> 5 Ω) - PERBAIKI PENTANAHAN!";
+        badgeCompliance.style.background = "#ef4444";
+        badgeCompliance.style.color = "#ffffff";
+      }
+
+      updateCables();
+      updateFOPCurveHUD();
+    }
+
+    // Sliders input
+    rangeProbe.addEventListener("input", (e) => {
+      pos_x = parseFloat(e.target.value);
+      updateSimulation();
+    });
+
+    rangeDist.addEventListener("input", (e) => {
+      dist_D = parseFloat(e.target.value);
+      updateSimulation();
+    });
+
+    // Quick Jump Buttons
+    document.getElementById("btn-p52").addEventListener("click", () => {
+      pos_x = parseFloat((0.52 * dist_D).toFixed(1));
+      updateSimulation();
+    });
+
+    document.getElementById("btn-p618").addEventListener("click", () => {
+      pos_x = parseFloat((0.618 * dist_D).toFixed(1));
+      updateSimulation();
+    });
+
+    document.getElementById("btn-p72").addEventListener("click", () => {
+      pos_x = parseFloat((0.72 * dist_D).toFixed(1));
+      updateSimulation();
+    });
+
+    // Soil Dropdown
+    document.getElementById("select-soil").addEventListener("change", (e) => {
+      rho = parseFloat(e.target.value);
+      updateSimulation();
+    });
+
+    // =========================================================================
+    // 6. 3D DRAG AND DROP FOR PROBE P IN SOIL
+    // =========================================================================
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let isDraggingProbe = false;
+    const planeGround = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    const planeIntersect = new THREE.Vector3();
+
+    window.addEventListener("pointerdown", (e) => {
+      if (e.target.closest(".header-bar") || e.target.closest(".curve-card") || e.target.closest(".instrument-card") || e.target.closest(".control-panel")) {
+        return;
+      }
+
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const hits = raycaster.intersectObjects(stakeP_Group.children, true);
+      if (hits.length > 0) {
+        isDraggingProbe = true;
+        controls.enabled = false;
+        document.body.style.cursor = "grabbing";
+      }
+    });
+
+    window.addEventListener("pointermove", (e) => {
+      if (!isDraggingProbe) return;
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      if (raycaster.ray.intersectPlane(planeGround, planeIntersect)) {
+        pos_x = Math.max(0.8, Math.min(dist_D - 0.8, planeIntersect.x));
+        updateSimulation();
+      }
+    });
+
+    window.addEventListener("pointerup", () => {
+      if (isDraggingProbe) {
+        isDraggingProbe = false;
+        controls.enabled = true;
+        document.body.style.cursor = "default";
+      }
+    });
+
+    // Header View Buttons (Toggle Hemispheres & Cables)
+    const btnHemi = document.getElementById("hdr-btn-hemi");
+    btnHemi.addEventListener("click", () => {
+      showHemispheres = !showHemispheres;
+      btnHemi.classList.toggle("active", showHemispheres);
+      hemiGroup.visible = showHemispheres;
+    });
+
+    const btnWires = document.getElementById("hdr-btn-wires");
+    btnWires.addEventListener("click", () => {
+      showCables = !showCables;
+      btnWires.classList.toggle("active", showCables);
+      updateCables();
+    });
+
+    // =========================================================================
+    // 7. BILINGUAL LANGUAGE SWITCHER (ID / EN)
+    // =========================================================================
+    const btnLang = document.getElementById("hdr-btn-lang");
+    const tagId = document.getElementById("lang-tag-id");
+    const tagEn = document.getElementById("lang-tag-en");
+
+    btnLang.addEventListener("click", () => {
+      currentLang = (currentLang === 'id') ? 'en' : 'id';
+      applyLanguage();
+    });
+
+    function applyLanguage() {
+      const isEn = (currentLang === 'en');
+      tagId.className = isEn ? "" : "lang-active-tag";
+      tagEn.className = isEn ? "lang-active-tag" : "";
+
+      document.getElementById("nav-badge-title").textContent = isEn ?
+        "FALL OF POTENTIAL EARTH TESTING (3-POLE)" :
+        "PENGUJIAN TAHANAN PENTANAHAN FALL OF POTENTIAL";
+
+      document.getElementById("hdr-btn-hemi").textContent = isEn ? "Potential Bowls (Hemispheres)" : "Bola Potensial (Hemispheres)";
+      document.getElementById("hdr-btn-wires").textContent = isEn ? "Test Leads / Cables" : "Kabel Alat Uji";
+
+      document.getElementById("txt-curve-title").textContent = isEn ? "Fall of Potential Curve R(x)" : "Kurva Fall of Potential R(x)";
+      document.getElementById("svg-txt-plateau").textContent = isEn ? "61.8% Plateau Zone" : "Zona Datar 61.8%";
+
+      document.getElementById("txt-tester-title").textContent = isEn ? "3-POLE DIGITAL EARTH TESTER" : "EARTH TESTER DIGITAL 3-TITIK";
+      document.getElementById("lbl-diag-pos").textContent = isEn ? "Potential Probe P Position:" : "Posisi Pasak Potensial P:";
+      document.getElementById("lbl-diag-true").textContent = isEn ? "True Earth Resistance R_E:" : "Tahanan Pentanahan Sejati R_E:";
+      document.getElementById("lbl-diag-plat").textContent = isEn ? "Plateau Flatness (52-72%):" : "Kemiringan Zona Datar (52-72%):";
+      document.getElementById("lbl-diag-soil").textContent = isEn ? "Soil Resistivity (ρ):" : "Resistivitas Tanah (ρ):";
+
+      document.getElementById("txt-hint").textContent = isEn ?
+        "Drag Probe P (Yellow stake) on the 3D ground or use slider | Left Click: Orbit | Scroll: Zoom" :
+        "Tarik Pasak P (Kuning) di atas tanah 3D atau geser slider | Klik Kiri: Putar Kamera | Scroll: Zoom";
+
+      document.getElementById("lbl-slider-p").textContent = isEn ? "Potential Probe P Position (x from E)" : "Posisi Pasak Potensial P (x dari E)";
+      document.getElementById("lbl-slider-d").textContent = isEn ? "Current Spike C Distance (D)" : "Jarak Pasak Arus C (D)";
+      document.getElementById("lbl-quick").textContent = isEn ? "Quick Jump:" : "Lompat Cepat:";
+      document.getElementById("lbl-soil-select").textContent = isEn ? "Soil Stratification:" : "Karakteristik Tanah:";
+
+      updateSimulation();
+    }
+
+    // Animation Render Loop
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    updateSimulation();
+    animate();
+  </script>
+</body>
+</html>
