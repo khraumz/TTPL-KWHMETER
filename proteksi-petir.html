@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi 3D Proteksi Petir: Franklin Rod, ESE &amp; DAS/CTS (TTPL FTUI)</title>
+  <style>
+    /* ==========================================================================
+       STANDAR GAYA & TEMA TTPL (Sama Persis dengan earth-tester.html):
+       - Biru Utama: #004FBD
+       - Kuning Murni: #FFF100
+       - Hijau Limau: #9ADD67
+       - Seluruh Font: Hitam (#000000) / Navy (#0f2744)
+       - Card: #ffffff dengan shadow 0 4px 20px rgba(0,0,0,0.04), border 1px solid rgba(0,0,0,0.06)
+       ========================================================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #f8fafc;
+      color: #000000;
+      overflow-y: auto;
+      overflow-x: hidden;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Main Container for EMAS 3 / Moodle Dashboard */
+    .emas-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 14px 16px 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-sizing: border-box;
+    }
+
+    /* Global Navigation Bar & Mode Switcher (Matching TTPL Header in earth-tester.html) */
+    .header-bar {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.06);
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    .pill-badge {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14pt;
+      font-weight: bold;
+      letter-spacing: -0.02em;
+      color: #0f2744;
+      background: linear-gradient(135deg, #dbeafe 0%, #ccfbf1 50%, #fef9c3 100%);
+      padding: 7px 18px 7px 14px;
+      border-radius: 9999px;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 10px;
+      white-space: nowrap !important;
+      line-height: 1.2;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 8px 20px -4px rgba(14, 165, 233, 0.15), 0 3px 6px -2px rgba(15, 23, 42, 0.04), inset 0 1.5px 2px rgba(255, 255, 255, 0.9);
+      margin: 0;
+    }
+
+    .pill-svg {
+      width: 32px !important;
+      height: 18px !important;
+      min-width: 32px !important;
+      max-width: 32px !important;
+      min-height: 18px !important;
+      max-height: 18px !important;
+      display: inline-block !important;
+      vertical-align: middle !important;
+      margin: 0 !important;
+      overflow: hidden !important;
+      flex-shrink: 0 !important;
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%) !important;
+      mask-image: linear-gradient(to right, transparent 0%, black 22%, black 78%, transparent 100%) !important;
+    }
+
+    .hdr-tabs-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+    }
+
+    .hdr-nav-btn {
+      border: none;
+      background: transparent;
+      color: #000000;
+      padding: 6px 12px;
+      border-radius: 7px;
+      font-weight: 800;
+      font-size: 0.76rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .hdr-nav-btn.active {
+      background: #ffffff;
+      color: #000000;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .hdr-lang-btn {
+      border: 1px solid #004FBD;
+      background: rgba(0, 79, 189, 0.08);
+      color: #000000;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .hdr-lang-btn:hover {
+      background: #004FBD;
+      color: #ffffff;
+    }
+
+    .hdr-lang-btn .lang-active-tag {
+      background: #004FBD;
+      color: #ffffff;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+    }
+
+    /* Dashboard Grid (2-Column Desktop, 1-Column Mobile/Iframe) */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 370px;
+      gap: 14px;
+      align-items: start;
+      width: 100%;
+    }
+
+    @media (max-width: 1080px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .col-main {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .col-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+      min-width: 0;
+    }
+
+    /* 3D Viewport Card */
+    .viewport-card {
+      position: relative;
+      width: 100%;
+      height: 525px;
+      min-height: 430px;
+      background: #0f172a;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    .viewport-card:fullscreen {
+      width: 100vw;
+      height: 100vh;
+      border-radius: 0;
+      border: none;
+    }
+
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    /* Top System Selector Pills Floating in Viewport */
+    .viewport-top-pills {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .system-pill-group {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(6px);
+      padding: 5px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+      pointer-events: auto;
+    }
+
+    .sys-pill-btn {
+      border: 1px solid transparent;
+      background: transparent;
+      color: #0f2744;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+
+    .sys-pill-btn:hover {
+      background: #f1f5f9;
+      color: #004FBD;
+    }
+
+    .sys-pill-btn.active {
+      background: #004FBD;
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(0, 79, 189, 0.25);
+    }
+
+    .stage-banner-pill {
+      background: rgba(255, 255, 255, 0.95);
+      color: #0f2744;
+      border: 1.5px solid #004FBD;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 900;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+      pointer-events: auto;
+    }
+
+    /* Interaction Hint Inside Viewport */
+    .interaction-hint {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      font-weight: 700;
+      color: #0f2744;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(4px);
+      border: 1px solid #cbd5e1;
+      padding: 6px 16px;
+      border-radius: 20px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+      pointer-events: none;
+      z-index: 10;
+      white-space: nowrap;
+      max-width: 92%;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    /* Control Panel Card */
+    .control-card {
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .control-row-sliders {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    @media (max-width: 680px) {
+      .control-row-sliders {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+
+    .slider-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      width: 100%;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 11.5px;
+      font-weight: 800;
+      color: #000000;
+    }
+
+    .slider-header span.val-tag {
+      font-size: 11.5px;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    .tag-blue {
+      background: rgba(0, 79, 189, 0.08);
+      color: #004FBD;
+      border: 1px solid rgba(0, 79, 189, 0.25);
+    }
+
+    .tag-yellow {
+      background: rgba(255, 241, 0, 0.3);
+      color: #000000;
+      border: 1px solid #eab308;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 7px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      border: 1px solid #cbd5e1;
+      outline: none;
+      cursor: pointer;
+      margin: 3px 0;
+    }
+
+    input.slider-probe::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      background: #FFF100;
+      border: 2px solid #000000;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+
+    .action-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 8px;
+    }
+
+    .quick-jump-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .btn-quick {
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #000000;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-quick:hover {
+      background: #ffffff;
+      border-color: #004FBD;
+      color: #004FBD;
+    }
+
+    .btn-quick.target-618 {
+      background: #9ADD67;
+      color: #0f2744;
+      border-color: #84cc16;
+      box-shadow: 0 1px 4px rgba(154, 221, 103, 0.4);
+    }
+
+    .dropdown-soil {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #000000;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Right Sidebar Cards */
+    .instrument-card {
+      position: relative;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      padding: 16px 18px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-sizing: border-box;
+    }
+
+    .instrument-top-accent {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #9ADD67 0%, #FFF100 50%, #004FBD 100%);
+    }
+
+    .card-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .card-title-row h3 {
+      font-size: 13.5px;
+      font-weight: 900;
+      color: #0f2744;
+      margin: 0;
+    }
+
+    .lcd-display {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 14px 14px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 10px 25px -4px rgba(14, 165, 233, 0.18), 0 4px 10px -2px rgba(15, 23, 42, 0.05), inset 0 1px 2px #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .lcd-resistance {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 30px;
+      font-weight: 900;
+      color: #004FBD;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+      text-shadow: 0 1px 2px rgba(0, 79, 189, 0.15);
+      text-align: center;
+    }
+
+    .lcd-sub-status {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(154, 221, 103, 0.35);
+      color: #0f2744;
+      border: 1px solid #84cc16;
+      text-align: center;
+    }
+
+    .diag-box {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 10px 12px;
+      border: 1px solid #e2e8f0;
+      font-size: 11.5px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .diag-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .diag-label {
+      color: #64748b;
+      font-weight: 700;
+      font-size: 11px;
+    }
+
+    .diag-val {
+      color: #000000;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .curve-card {
+      position: relative;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      padding: 14px 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-sizing: border-box;
+    }
+
+    .curve-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .curve-title-row span.title {
+      font-size: 12.5px;
+      font-weight: 900;
+      color: #0f2744;
+    }
+
+    .curve-svg-box {
+      position: relative;
+      width: 100%;
+      height: 155px;
+      background: #ffffff;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+    }
+
+    .edu-note-box {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 10px 12px;
+      border-left: 4px solid #004FBD;
+      border-top: 1px solid #e2e8f0;
+      border-right: 1px solid #e2e8f0;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 11.2px;
+      line-height: 1.45;
+      color: #0f2744;
+    }
+
+    .edu-note-box strong {
+      color: #004FBD;
+      display: block;
+      margin-bottom: 3px;
+      font-size: 11.6px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="emas-container">
+
+    <!-- Global Header Bar (TTPL Design Standard — Identical to earth-tester.html) -->
+    <header class="header-bar">
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <div class="pill-badge">
+          <svg class="pill-svg">
+            <path d="M -32 9 Q -28 -2 -24 9 T -16 9 T -8 9 T 0 9 T 8 9 T 16 9 T 24 9 T 32 9 T 40 9 T 48 9 T 56 9 T 64 9"
+              fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round">
+              <animateTransform attributeName="transform" type="translate" from="0,0" to="-16,0" dur="1s" repeatCount="indefinite" />
+            </path>
+          </svg>
+          <span id="nav-badge-title">PROTEKSI PETIR: FRANKLIN ROD, ESE &amp; DAS</span>
+        </div>
+      </div>
+
+      <!-- View Switcher, Pan, Presets, Fullscreen & Language Toggle -->
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+        <div class="hdr-tabs-container">
+          <button id="hdr-btn-cone" class="hdr-nav-btn active" type="button">🛡️ Zona Proteksi</button>
+          <button id="hdr-btn-mode-pan" class="hdr-nav-btn" type="button" title="Mode Geser Layar / Pan Screen">✋ Geser Layar</button>
+          <button id="hdr-btn-cam-full" class="hdr-nav-btn active" type="button">🔭 Awan &amp; Gedung</button>
+          <button id="hdr-btn-cam-roof" class="hdr-nav-btn" type="button">🏠 Detail Air Terminal</button>
+          <button id="hdr-btn-fullscreen" class="hdr-nav-btn" type="button" title="Layar Penuh / Fullscreen">⛶ Layar Penuh</button>
+        </div>
+
+        <button id="hdr-btn-lang" class="hdr-lang-btn" type="button" title="Ganti Bahasa / Switch Language">
+          <span id="lang-tag-id" class="lang-active-tag">ID</span>
+          <span>/</span>
+          <span id="lang-tag-en">EN</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Dashboard Grid (EMAS 3 Responsive Flow) -->
+    <main class="dashboard-grid">
+
+      <!-- Left Column: 3D Viewport & Control Panel -->
+      <div class="col-main">
+
+        <!-- 3D WebGL Canvas Viewport Card -->
+        <div class="viewport-card" id="viewport-card">
+          <div id="canvas-container"></div>
+
+          <!-- Top Floating System Mode Pills & Live Stage Pill -->
+          <div class="viewport-top-pills">
+            <div class="system-pill-group">
+              <button class="sys-pill-btn active" id="pill-franklin" type="button">Franklin Rod</button>
+              <button class="sys-pill-btn" id="pill-ese" type="button">ESE</button>
+              <button class="sys-pill-btn" id="pill-das" type="button">DAS / CTS</button>
+              <button class="sys-pill-btn" id="pill-compare" type="button">⚡ Bandingkan 3 Sistem</button>
+            </div>
+            <div class="stage-banner-pill" id="stage-banner-pill">
+              Tahap 1: Pemisahan Muatan Awan (−) &amp; Induksi Bumi (+)
+            </div>
+          </div>
+
+          <!-- Interaction Hint Pill inside Viewport -->
+          <div class="interaction-hint" id="txt-hint">
+            Pilih sistem (Franklin Rod, ESE, atau DAS/CTS) di atas atau geser slider Tahap Petir | Klik Kiri: Putar Kamera | Klik Kanan: Geser | Scroll: Zoom
+          </div>
+        </div>
+
+        <!-- Interactive Control Panel Card -->
+        <div class="control-card" id="control-card">
+          <div class="control-row-sliders">
+            <!-- Timeline Stage Slider (0% to 100%) -->
+            <div class="slider-item">
+              <div class="slider-header">
+                <span id="lbl-slider-stage">Linimasa Proses Petir (1. Induksi → 2. Stepped Leader → 3. Upward Streamer → 4. Return Stroke)</span>
+                <span class="val-tag tag-yellow" id="tag-stage-val">Siklus = 0% (Auto)</span>
+              </div>
+              <input type="range" class="slider-probe" id="range-stage" min="0" max="100" step="0.5" value="0">
+            </div>
+          </div>
+
+          <!-- Quick Jump Stage Buttons & System Dropdown -->
+          <div class="action-row">
+            <div class="quick-jump-group">
+              <span style="font-size: 11px; font-weight: 800; color: #64748b;" id="lbl-quick">Kontrol Tahap:</span>
+              <button class="btn-quick target-618" id="btn-auto-play" type="button">⏸ Animasi Otomatis: ON</button>
+              <button class="btn-quick" id="btn-step-1" type="button">1. Induksi (15%)</button>
+              <button class="btn-quick" id="btn-step-2" type="button">2. Leader &amp; Streamer (58%)</button>
+              <button class="btn-quick" id="btn-step-3" type="button">3. Return Stroke / Puncak (82%)</button>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <span style="font-size: 11px; font-weight: 800; color: #64748b;" id="lbl-sys-select">Sistem Proteksi:</span>
+              <select class="dropdown-soil" id="select-lps">
+                <option value="franklin" selected>Franklin Rod</option>
+                <option value="ese">ESE</option>
+                <option value="das">DAS / CTS</option>
+                <option value="compare">Bandingkan 3 Sistem</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Live Physics Curve & Explanation -->
+      <div class="col-sidebar">
+
+        <!-- Electric Field & Streamer Comparison Curve Card -->
+        <div class="curve-card" id="curve-card">
+          <div class="instrument-top-accent"></div>
+          <div class="curve-title-row" style="margin-top: 4px;">
+            <span class="title" id="txt-curve-title">Profil Medan Listrik E(t) &amp; Respon Sistem</span>
+            <span style="font-size: 10.5px; font-weight: 800; color: #004FBD;" id="txt-curve-sub">E_crit = 3×10⁶ V/m</span>
+          </div>
+          <div class="curve-svg-box">
+            <svg id="svg-lps-curve" width="100%" height="100%" viewBox="0 0 330 155" preserveAspectRatio="none">
+              <!-- Breakdown Dielectric Threshold Line (3 MV/m) -->
+              <rect x="20" y="10" width="295" height="28" fill="rgba(239, 68, 68, 0.10)"></rect>
+              <line x1="20" y1="38" x2="315" y2="38" stroke="#ef4444" stroke-width="1.3" stroke-dasharray="4,3"></line>
+              <text x="24" y="33" font-size="7.5" font-weight="800" fill="#dc2626">Batas Breakdown Udara (3×10⁶ V/m) → Plasma Channel</text>
+
+              <!-- ESE Early Trigger Line -->
+              <line x1="20" y1="62" x2="315" y2="62" stroke="#004FBD" stroke-width="1.0" stroke-dasharray="2,3"></line>
+              <text x="24" y="58" font-size="7.2" font-weight="800" fill="#004FBD">Titik Picu Ionisasi Cepat ESE (ΔT Lebih Awal)</text>
+
+              <!-- Axes -->
+              <line x1="20" y1="128" x2="315" y2="128" stroke="#cbd5e1" stroke-width="1.2"></line>
+              <line x1="20" y1="10" x2="20" y2="128" stroke="#cbd5e1" stroke-width="1.2"></line>
+
+              <!-- Curve 1: Franklin Rod E(t) (Blue) -->
+              <path id="svg-path-franklin" d="" fill="none" stroke="#004FBD" stroke-width="2.2" stroke-linecap="round"></path>
+
+              <!-- Curve 2: ESE E(t) (Yellow-Amber) -->
+              <path id="svg-path-ese" d="" fill="none" stroke="#eab308" stroke-width="2.2" stroke-linecap="round"></path>
+
+              <!-- Curve 3: DAS/CTS E(t) stays low (Green) -->
+              <path id="svg-path-das" d="" fill="none" stroke="#16a34a" stroke-width="2.4" stroke-linecap="round"></path>
+
+              <!-- Live Time Marker Dot -->
+              <circle id="svg-marker-time" cx="60" cy="100" r="5" fill="#FFF100" stroke="#000000" stroke-width="2"></circle>
+
+              <!-- Legend -->
+              <text id="svg-txt-legend" x="20" y="145" font-size="7.5" font-weight="800" fill="#0f2744">Biru: Franklin (Pasif) | Kuning: ESE (Cepat ΔT) | Hijau: DAS (Cegah &lt; 3 MV/m)</text>
+            </svg>
+          </div>
+
+          <!-- Educational Note Box (Modul 7 IDP Summary) -->
+          <div class="edu-note-box">
+            <strong id="edu-title">Franklin Rod</strong>
+            <span id="edu-desc">Batang logam runcing tunggal di atap gedung. Saat Stepped Leader (−) turun mendekat dan E melewati 3×10⁶ V/m, ujung runcing memunculkan Upward Streamer (+) alami untuk menangkap sambaran petir lalu menyalurkannya melalui Down Conductor → Check Terminal → Earthing Rod ke tanah.</span>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Three.js Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <script>
+    // =========================================================================
+    // 1. CURRICULUM DATA & STATE (Based on Modul 7 IDP TTPL FTUI)
+    // =========================================================================
+    let currentLang = 'id';
+    let lpsMode = 'franklin'; // 'franklin', 'ese', 'das', 'compare'
+    let stagePct = 0;         // 0 to 100%
+    let isAutoPlay = true;
+    let showProtectionZone = true;
+
+    const LPS_DATA = {
+      franklin: {
+        lcd_id: "Rp = 18 m",
+        lcd_en: "Rp = 18 m",
+        badge_id: "⚡ FRANKLIN ROD — KONVENSIONAL PASIF (TANGKAP & SALURKAN)",
+        badge_en: "⚡ FRANKLIN ROD — PASSIVE CONVENTIONAL (INTERCEPT & CONDUCT)",
+        type_id: "Konvensional (Pasif Tunggal)",
+        type_en: "Conventional (Single Passive Rod)",
+        mech_id: "Upward Streamer (+) Alami Sesaat",
+        mech_en: "Natural Late Upward Streamer (+)",
+        field_id: "E > 3×10⁶ V/m (Terjadi Sambaran)",
+        field_en: "E > 3×10⁶ V/m (Strike Occurs)",
+        path_id: "Air Term. → Down Cond. → Check Box → Rod E",
+        path_en: "Air Term. → Down Cond. → Check Box → Rod E",
+        title_id: "Franklin Rod",
+        title_en: "Franklin Rod",
+        desc_id: "Berbentuk batang logam runcing tunggal di atap. Bekerja secara PASIF: menunggu Stepped Leader (−) turun mendekat hingga memicu Upward Streamer (+) pendek. Arus Return Stroke disalurkan lewat Down Conductor → Check Terminal → Earthing Rod ke tanah.",
+        desc_en: "A single sharp metal rod mounted on the roof. Works PASSIVELY: waits for the descending Stepped Leader (−) to trigger a short Upward Streamer (+), then channels Return Stroke current via Down Conductor → Check Terminal → Earthing Rod to ground."
+      },
+      ese: {
+        lcd_id: "Rp = 48 m (ΔT+)",
+        lcd_en: "Rp = 48 m (ΔT+)",
+        badge_id: "🚀 ESE — IONISASI AKTIF LEBIH CEPAT (UPWARD STREAMER TINGGI)",
+        badge_en: "🚀 ESE — EARLY STREAMER EMISSION (ACTIVE EARLY IONIZATION)",
+        type_id: "Nonkonvensional (Aktif Menangkap)",
+        type_en: "Non-Conventional (Active Interception)",
+        mech_id: "Ionisasi Udara Lebih Cepat (ΔT = 60 μs)",
+        mech_en: "Early Air Ionization (ΔT = 60 μs)",
+        field_id: "Picu Awal → Upward Streamer Jauh (ΔL)",
+        field_en: "Early Trigger → High Upward Streamer (ΔL)",
+        path_id: "Tangkap Tinggi → Down Cond. → Rod E",
+        path_en: "High Intercept → Down Cond. → Rod E",
+        title_id: "ESE",
+        title_en: "ESE",
+        desc_id: "Bekerja secara AKTIF mengionisasi udara di sekitar kepala Air Terminal lebih cepat (ΔT) saat muncul medan listrik awan. Menghasilkan Upward Streamer (+) yang meluncur lebih awal dan lebih tinggi untuk menarik petir ke titik ESE (Radius Proteksi jauh lebih luas).",
+        desc_en: "Works ACTIVELY by ionizing air around the ESE head earlier (ΔT) when storm electric fields rise. Launches an earlier, higher Upward Streamer (+) so lightning preferentially strikes the ESE terminal, creating a much wider protection radius."
+      },
+      das: {
+        lcd_id: "0 kA (DICEGAH)",
+        lcd_en: "0 kA (PREVENTED)",
+        badge_id: "🛡️ DAS / CTS — DISIPASI ION POSITIF (SAMBARAN PETIR TERCEGAH!)",
+        badge_en: "🛡️ DAS / CTS — POSITIVE ION DISSIPATION (STRIKE PREVENTED!)",
+        type_id: "Nonkonvensional (Aktif Mencegah)",
+        type_en: "Non-Conventional (Active Prevention)",
+        mech_id: "Generasi Ribuan Ion Positif (+) ke Awan",
+        mech_en: "Multi-Point Positive Ion (+) Plume to Cloud",
+        field_id: "E < 3×10⁶ V/m (Netralisasi Muatan)",
+        field_en: "E < 3×10⁶ V/m (Charge Neutralized)",
+        path_id: "Transfer Muatan Kontinu (Tanpa Sambaran)",
+        path_en: "Continuous Charge Transfer (No Flashover)",
+        title_id: "DAS / CTS",
+        title_en: "DAS / CTS",
+        desc_id: "Menggunakan kisi logam dengan ribuan ujung lancip tersebar untuk menggenerasi ion positif (+) yang terbang ke atas menuju dasar awan negatif (−). Menurunkan beda potensial di atas gedung sehingga Stepped Leader gagal terbentuk dan sambaran petir TERCEGAH!",
+        desc_en: "Uses a multi-point array of sharp metal needles to continuously generate positive ions (+) rising toward the negative (−) cloud base. Lowers the potential difference above the building so Stepped Leaders cannot form and lightning strikes are PREVENTED!"
+      },
+      compare: {
+        lcd_id: "3 SISTEM LIVE",
+        lcd_en: "3 SYSTEMS LIVE",
+        badge_id: "🔬 KOMPARASI LANGSUNG: FRANKLIN (KIRI) vs ESE (TENGAH) vs DAS (KANAN)",
+        badge_en: "🔬 SIDE-BY-SIDE: FRANKLIN (LEFT) vs ESE (CENTER) vs DAS (RIGHT)",
+        type_id: "Konvensional vs Nonkonvensional",
+        type_en: "Conventional vs Non-Conventional",
+        mech_id: "Pasif vs Ionisasi Cepat vs Disipasi Ion",
+        mech_en: "Passive vs Early Streamer vs Ion Dissipation",
+        field_id: "Bandingkan Tinggi Streamer & Ion Plume",
+        field_en: "Compare Streamer Height & Ion Plume",
+        path_id: "Franklin & ESE Menyambar | DAS Mencegah",
+        path_en: "Franklin & ESE Strike | DAS Prevents",
+        title_id: "Franklin Rod vs ESE vs DAS / CTS",
+        title_en: "Franklin Rod vs ESE vs DAS / CTS",
+        desc_id: "• Kiri (Franklin Rod): Menunggu pasif, Upward Streamer pendek, radius sempit.\n• Tengah (ESE): Ionisasi lebih awal, Upward Streamer melompat tinggi menyambut Stepped Leader, radius luas.\n• Kanan (DAS/CTS): Menyemburkan kabut ion positif (+) ke awan sehingga petir dicegah!",
+        desc_en: "• Left (Franklin Rod): Passive, short upward streamer, narrow cone.\n• Center (ESE): Early ionization launches high upward streamer, wide dome.\n• Right (DAS/CTS): Emits continuous upward positive ions (+), neutralizing cloud charge and preventing lightning!"
+      }
+    };
+
+    // =========================================================================
+    // 2. THREE.JS 3D SCENE SETUP
+    // =========================================================================
+    const container = document.getElementById("canvas-container");
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0c192c);
+    scene.fog = new THREE.FogExp2(0x0c192c, 0.0045);
+
+    function getViewportSize() {
+      const w = container.clientWidth || 800;
+      const h = container.clientHeight || 525;
+      return { w, h };
+    }
+    const initialSize = getViewportSize();
+
+    const camera = new THREE.PerspectiveCamera(44, initialSize.w / initialSize.h, 0.5, 600);
+    camera.position.set(0, 14, 38);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    renderer.setSize(initialSize.w, initialSize.h);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.screenSpacePanning = true;
+    controls.enablePan = true;
+    controls.panSpeed = 1.2;
+    controls.maxPolarAngle = Math.PI / 2 + 0.05;
+    controls.minDistance = 4;
+    controls.maxDistance = 95;
+    controls.target.set(0, 10.5, 0);
+
+    let isPanMode = false;
+    const btnModePan = document.getElementById("hdr-btn-mode-pan");
+    function setPanMode(active) {
+      isPanMode = active;
+      if (btnModePan) btnModePan.classList.toggle("active", isPanMode);
+      controls.mouseButtons.LEFT = isPanMode ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
+      renderer.domElement.style.cursor = isPanMode ? "grab" : "default";
+    }
+    if (btnModePan) {
+      btnModePan.addEventListener("click", () => setPanMode(!isPanMode));
+    }
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xdbeafe, 0.72);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.05);
+    dirLight.position.set(22, 36, 26);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+    scene.add(dirLight);
+
+    // Lightning Flash PointLight in Sky
+    const flashLight = new THREE.PointLight(0xfff100, 0, 120);
+    flashLight.position.set(0, 18, 2);
+    scene.add(flashLight);
+
+    // =========================================================================
+    // 3. GROUND, SOIL CROSS-SECTION & STORM CLOUD WITH (+ / −) CHARGES
+    // =========================================================================
+    const groundGroup = new THREE.Group();
+    const grassMat = new THREE.MeshStandardMaterial({ color: 0x2e5a1c, roughness: 0.88 });
+    const grassMesh = new THREE.Mesh(new THREE.BoxGeometry(76, 0.5, 36), grassMat);
+    grassMesh.position.set(0, -0.25, 0);
+    grassMesh.receiveShadow = true;
+    groundGroup.add(grassMesh);
+
+    const soilMat = new THREE.MeshStandardMaterial({ color: 0x452c1e, roughness: 0.92 });
+    const soilMesh = new THREE.Mesh(new THREE.BoxGeometry(76, 3.6, 36), soilMat);
+    soilMesh.position.set(0, -2.3, 0);
+    groundGroup.add(soilMesh);
+
+    const groundGrid = new THREE.GridHelper(76, 38, 0x004FBD, 0x334155);
+    groundGrid.position.y = 0.02;
+    groundGroup.add(groundGrid);
+    scene.add(groundGroup);
+
+    // Storm Cloud Layer at Y = 22.5 (Top Positive +, Bottom Negative −)
+    const cloudGroup = new THREE.Group();
+    const cloudDarkMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9, transparent: true, opacity: 0.92 });
+    const cloudTopMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.85, transparent: true, opacity: 0.9 });
+
+    for (let i = -22; i <= 22; i += 3.2) {
+      const r1 = 2.4 + Math.sin(i * 1.3) * 0.6;
+      const puffBase = new THREE.Mesh(new THREE.SphereGeometry(r1, 18, 18), cloudDarkMat);
+      puffBase.scale.set(1.5, 0.72, 1.3);
+      puffBase.position.set(i, 21.8 + Math.cos(i) * 0.25, (i % 2 === 0 ? 0.6 : -0.6));
+      cloudGroup.add(puffBase);
+
+      const puffTop = new THREE.Mesh(new THREE.SphereGeometry(r1 * 0.9, 16, 16), cloudTopMat);
+      puffTop.scale.set(1.4, 0.8, 1.2);
+      puffTop.position.set(i + 0.5, 23.6 + Math.sin(i) * 0.3, 0);
+      cloudGroup.add(puffTop);
+    }
+    scene.add(cloudGroup);
+
+    // Helper for (+ / −) Charge Sprite Badges
+    function makeChargeSprite(symbol, bgCol, textCol = "#ffffff") {
+      const cvs = document.createElement("canvas");
+      cvs.width = 64;
+      cvs.height = 64;
+      const ctx = cvs.getContext("2d");
+      ctx.fillStyle = bgCol;
+      ctx.beginPath();
+      ctx.arc(32, 32, 26, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "#ffffff";
+      ctx.stroke();
+      ctx.fillStyle = textCol;
+      ctx.font = "900 36px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(symbol, 32, 33);
+      const tex = new THREE.CanvasTexture(cvs);
+      const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
+      sp.scale.set(1.15, 1.15, 1);
+      return sp;
+    }
+
+    // Populate Cloud Top (+) and Cloud Base (−) Charges (Gambar 4 Modul 7)
+    const cloudNegSprites = [];
+    for (let x = -20; x <= 20; x += 4.0) {
+      const spPos = makeChargeSprite("+", "#ef4444");
+      spPos.position.set(x, 24.3, 1.8);
+      scene.add(spPos);
+
+      const spNeg = makeChargeSprite("−", "#0284c7");
+      spNeg.position.set(x, 20.8, 1.9);
+      scene.add(spNeg);
+      cloudNegSprites.push(spNeg);
+    }
+
+    // =========================================================================
+    // 4. BUILDING + AIR TERMINAL + DOWN CONDUCTOR + CHECK BOX + EARTHING ROD
+    // =========================================================================
+    const copperMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.25, metalness: 0.85 });
+    const chromeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.15, metalness: 0.92 });
+    const blueMetalMat = new THREE.MeshStandardMaterial({ color: 0x004FBD, roughness: 0.3, metalness: 0.65 });
+
+    function createBuildingStation(type, posX, labelTitle) {
+      const station = new THREE.Group();
+      station.position.set(posX, 0, 0);
+
+      // 1. Building Plinth & Walls ("Basecamp TTPL")
+      const plinth = new THREE.Mesh(
+        new THREE.BoxGeometry(6.8, 0.35, 5.2),
+        new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8 })
+      );
+      plinth.position.y = 0.18;
+      station.add(plinth);
+
+      const walls = new THREE.Mesh(
+        new THREE.BoxGeometry(6.4, 3.8, 4.8),
+        new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.7 })
+      );
+      walls.position.y = 2.25;
+      walls.castShadow = true;
+      walls.receiveShadow = true;
+      station.add(walls);
+
+      // Windows & Door
+      const door = new THREE.Mesh(
+        new THREE.BoxGeometry(1.2, 2.2, 0.1),
+        new THREE.MeshStandardMaterial({ color: 0x1e293b })
+      );
+      door.position.set(-1.4, 1.45, 2.42);
+      station.add(door);
+
+      const win = new THREE.Mesh(
+        new THREE.BoxGeometry(1.8, 1.2, 0.1),
+        new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.15, metalness: 0.7 })
+      );
+      win.position.set(1.3, 1.8, 2.42);
+      station.add(win);
+
+      // Gable Roof
+      const roofMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.55 });
+      const slopeF = new THREE.Mesh(new THREE.BoxGeometry(6.8, 0.16, 3.0), roofMat);
+      slopeF.position.set(0, 4.85, 1.2);
+      slopeF.rotation.x = 0.52;
+      station.add(slopeF);
+
+      const slopeB = new THREE.Mesh(new THREE.BoxGeometry(6.8, 0.16, 3.0), roofMat);
+      slopeB.position.set(0, 4.85, -1.2);
+      slopeB.rotation.x = -0.52;
+      station.add(slopeB);
+
+      // Front Sign Plaque on Building ("Rumahnya IR" & "TTPL Nongki di Sini")
+      const signCvs = document.createElement("canvas");
+      signCvs.width = 512;
+      signCvs.height = 230;
+      const sctx = signCvs.getContext("2d");
+
+      // White plaque plate with soft 3D border
+      sctx.fillStyle = "#ffffff";
+      sctx.beginPath();
+      sctx.roundRect(8, 8, 496, 214, 24);
+      sctx.fill();
+
+      sctx.lineWidth = 6;
+      sctx.strokeStyle = "#004FBD";
+      sctx.stroke();
+
+      // Top TTPL Blue accent stripe
+      sctx.fillStyle = "#004FBD";
+      sctx.beginPath();
+      sctx.roundRect(14, 14, 484, 14, 7);
+      sctx.fill();
+
+      // Line 1: "Rumahnya IR"
+      sctx.fillStyle = "#0f2744";
+      sctx.font = "bold 50px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      sctx.textAlign = "center";
+      sctx.textBaseline = "middle";
+      sctx.fillText("Rumahnya IR", 256, 85);
+
+      // Line 2: "TTPL Nongki di Sini" pill
+      sctx.fillStyle = "#FFF100";
+      sctx.beginPath();
+      sctx.roundRect(48, 134, 416, 58, 16);
+      sctx.fill();
+      sctx.lineWidth = 3;
+      sctx.strokeStyle = "#004FBD";
+      sctx.stroke();
+
+      sctx.fillStyle = "#000000";
+      sctx.font = "bold 31px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      sctx.fillText("TTPL Nongki di Sini", 256, 163);
+
+      const signTex = new THREE.CanvasTexture(signCvs);
+      signTex.minFilter = THREE.LinearFilter;
+      const signPlane = new THREE.Mesh(
+        new THREE.PlaneGeometry(2.5, 1.12),
+        new THREE.MeshBasicMaterial({ map: signTex, transparent: true })
+      );
+      signPlane.position.set(0, 3.35, 2.43);
+      station.add(signPlane);
+
+      // 2. AIR TERMINAL ON ROOF (Y = 5.65)
+      const airTermGroup = new THREE.Group();
+      airTermGroup.position.set(0, 5.6, 0);
+
+      // Mast Base
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.28, 0.25, 16), copperMat);
+      airTermGroup.add(base);
+
+      let tipHeight = 2.4;
+
+      if (type === 'franklin') {
+        // FRANKLIN ROD: Single Sharp Tapered Copper Rod (Gambar 16)
+        const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.08, 2.1, 16), copperMat);
+        rod.position.y = 1.1;
+        airTermGroup.add(rod);
+
+        const tip = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.55, 16), copperMat);
+        tip.position.y = 2.35;
+        airTermGroup.add(tip);
+        tipHeight = 2.6;
+      } else if (type === 'ese') {
+        // ESE: Chrome Mast + Aerodynamic Ionization Dome Head + Trigger Fins (Gambar 18)
+        const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 2.2, 16), chromeMat);
+        mast.position.y = 1.1;
+        airTermGroup.add(mast);
+
+        // ESE Ionizer Dome Capsule (Gambar 18 photo)
+        const dome = new THREE.Mesh(new THREE.SphereGeometry(0.42, 24, 24), chromeMat);
+        dome.scale.set(1.0, 1.25, 1.0);
+        dome.position.y = 1.85;
+        airTermGroup.add(dome);
+
+        const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.46, 0.32, 0.22, 20), blueMetalMat);
+        collar.position.y = 1.45;
+        airTermGroup.add(collar);
+
+        // 4 Curved Upward Trigger Electrodes around ESE Dome
+        for (let a = 0; a < 4; a++) {
+          const ang = (a * Math.PI) / 2;
+          const fin = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.035, 0.65, 10), chromeMat);
+          fin.position.set(Math.cos(ang) * 0.42, 1.75, Math.sin(ang) * 0.42);
+          fin.rotation.z = -Math.cos(ang) * 0.35;
+          fin.rotation.x = Math.sin(ang) * 0.35;
+          airTermGroup.add(fin);
+        }
+
+        const centralTip = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.65, 16), chromeMat);
+        centralTip.position.y = 2.55;
+        airTermGroup.add(centralTip);
+        tipHeight = 2.85;
+      } else if (type === 'das') {
+        // DAS / CTS: Multi-Point Hemispherical Dissipation Array (Umbrella Spline Array — Gambar 19)
+        const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 1.8, 16), chromeMat);
+        mast.position.y = 0.9;
+        airTermGroup.add(mast);
+
+        // Parabolic / Hemispherical Arch Ribs with Many Fine Ionizer Spines
+        const archRing = new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.045, 12, 32), chromeMat);
+        archRing.rotation.x = Math.PI / 2;
+        archRing.position.y = 1.75;
+        airTermGroup.add(archRing);
+
+        for (let r = 0; r < 6; r++) {
+          const ang = (r * Math.PI) / 3;
+          const ribCurve = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(0, 2.35, 0),
+            new THREE.Vector3(Math.cos(ang) * 0.75, 2.15, Math.sin(ang) * 0.75),
+            new THREE.Vector3(Math.cos(ang) * 1.35, 1.55, Math.sin(ang) * 1.35)
+          ]);
+          const ribMesh = new THREE.Mesh(new THREE.TubeGeometry(ribCurve, 16, 0.035, 8, false), chromeMat);
+          airTermGroup.add(ribMesh);
+
+          // Fine sharp ionizer needles along each rib
+          [0.25, 0.5, 0.75, 1.0].forEach(f => {
+            const pt = ribCurve.getPoint(f);
+            const needle = new THREE.Mesh(new THREE.ConeGeometry(0.025, 0.38, 8), copperMat);
+            needle.position.set(pt.x, pt.y + 0.18, pt.z);
+            airTermGroup.add(needle);
+          });
+        }
+        tipHeight = 2.45;
+      }
+
+      station.add(airTermGroup);
+
+      // 3. DOWN CONDUCTOR + CHECK TERMINAL (KOTAK UJI) + EARTHING ROD IN SOIL (Gambar 8–11 Modul 7)
+      const dcPoints = [
+        new THREE.Vector3(0, 5.65, 0),
+        new THREE.Vector3(3.25, 4.3, 2.42),
+        new THREE.Vector3(3.25, 1.35, 2.42),
+        new THREE.Vector3(3.25, 0.0, 2.42),
+        new THREE.Vector3(3.25, -3.2, 2.42)
+      ];
+      const dcCurve = new THREE.CatmullRomCurve3(dcPoints);
+      const dcMat = new THREE.MeshStandardMaterial({
+        color: 0xb45309,
+        roughness: 0.3,
+        metalness: 0.8,
+        emissive: new THREE.Color(0x000000),
+        emissiveIntensity: 0
+      });
+      const dcMesh = new THREE.Mesh(new THREE.TubeGeometry(dcCurve, 32, 0.055, 10, false), dcMat);
+      station.add(dcMesh);
+
+      // Check Terminal (Kotak Terminal Uji) at Y = 1.35
+      const checkBox = new THREE.Mesh(
+        new THREE.BoxGeometry(0.48, 0.62, 0.22),
+        new THREE.MeshStandardMaterial({ color: 0xFFF100, roughness: 0.4 })
+      );
+      checkBox.position.set(3.25, 1.35, 2.45);
+      station.add(checkBox);
+
+      // Earthing Rod buried in Soil (Y = -0.2 to -3.5) with Ground Dissipation Rings
+      const earthRod = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 3.2, 14), copperMat);
+      earthRod.position.set(3.25, -1.8, 2.42);
+      station.add(earthRod);
+
+      const groundGlowMat = new THREE.MeshBasicMaterial({
+        color: 0xFFF100,
+        transparent: true,
+        opacity: 0,
+        side: THREE.DoubleSide
+      });
+      const groundGlowRing = new THREE.Mesh(new THREE.RingGeometry(0.3, 2.6, 28), groundGlowMat);
+      groundGlowRing.rotation.x = -Math.PI / 2;
+      groundGlowRing.position.set(3.25, 0.05, 2.42);
+      station.add(groundGlowRing);
+
+      // 4. TRANSLUCENT PROTECTION ZONE (CONE FOR FRANKLIN, WIDE DOME FOR ESE, ION SHIELD FOR DAS)
+      let zoneMesh = null;
+      if (type === 'franklin') {
+        const coneGeom = new THREE.ConeGeometry(5.6, 8.2, 32, 1, true);
+        const coneMat = new THREE.MeshBasicMaterial({
+          color: 0x004FBD,
+          transparent: true,
+          opacity: 0.13,
+          side: THREE.DoubleSide,
+          depthWrite: false
+        });
+        zoneMesh = new THREE.Mesh(coneGeom, coneMat);
+        zoneMesh.position.set(0, 4.1, 0);
+      } else if (type === 'ese') {
+        const domeGeom = new THREE.SphereGeometry(8.8, 32, 24, 0, Math.PI * 2, 0, Math.PI * 0.56);
+        const domeMat = new THREE.MeshBasicMaterial({
+          color: 0x0284c7,
+          transparent: true,
+          opacity: 0.14,
+          side: THREE.DoubleSide,
+          depthWrite: false
+        });
+        zoneMesh = new THREE.Mesh(domeGeom, domeMat);
+        zoneMesh.position.set(0, 0.2, 0);
+      } else {
+        const shieldGeom = new THREE.CylinderGeometry(4.8, 6.2, 12.5, 28, 1, true);
+        const shieldMat = new THREE.MeshBasicMaterial({
+          color: 0x9ADD67,
+          transparent: true,
+          opacity: 0.12,
+          side: THREE.DoubleSide,
+          depthWrite: false
+        });
+        zoneMesh = new THREE.Mesh(shieldGeom, shieldMat);
+        zoneMesh.position.set(0, 13.8, 0);
+      }
+      station.add(zoneMesh);
+
+      // 5. Induced Positive (+) Charges on Roof
+      const inducedPlus = [];
+      [-2.2, 0, 2.2].forEach(ix => {
+        const sp = makeChargeSprite("+", "#ef4444");
+        sp.position.set(ix, 5.7, 1.5);
+        sp.scale.set(0.85, 0.85, 1);
+        station.add(sp);
+        inducedPlus.push(sp);
+      });
+
+      // 6. ESE Early Ionization Halo Ring (For ESE only)
+      const eseHaloMat = new THREE.MeshBasicMaterial({
+        color: 0x38bdf8,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false
+      });
+      const eseHalo = new THREE.Mesh(new THREE.SphereGeometry(0.95, 20, 20), eseHaloMat);
+      eseHalo.position.set(0, 5.6 + 2.1, 0);
+      station.add(eseHalo);
+
+      // 7. DAS Rising Positive Ion Plume Particles (For DAS only)
+      const dasIonsGroup = new THREE.Group();
+      const dasIonParticles = [];
+      if (type === 'das') {
+        for (let k = 0; k < 28; k++) {
+          const ionSp = makeChargeSprite("+", "#16a34a");
+          ionSp.scale.set(0.68, 0.68, 1);
+          dasIonsGroup.add(ionSp);
+          dasIonParticles.push({
+            sprite: ionSp,
+            offset: k / 28,
+            rad: 0.4 + (k % 5) * 0.65,
+            ang: k * 1.35
+          });
+        }
+      }
+      station.add(dasIonsGroup);
+
+      // 8. Dynamic Stepped Leader (−), Upward Streamer (+), and Return Stroke Meshes
+      const plasmaGroup = new THREE.Group();
+      station.add(plasmaGroup);
+
+      return {
+        type,
+        group: station,
+        posX,
+        tipWorldY: 5.6 + tipHeight,
+        dcMat,
+        groundGlowMat,
+        zoneMesh,
+        inducedPlus,
+        eseHaloMat,
+        eseHalo,
+        dasIonParticles,
+        plasmaGroup
+      };
+    }
+
+    // Build Stations (Single Focused vs 3-Building Comparison)
+    let activeStations = [];
+    let badgeSprites = [];
+
+    function makeTextBadge(text, colorHex = "#0f2744", bgHex = "#ffffff", borderHex = "#004FBD") {
+      const cvs = document.createElement("canvas");
+      cvs.width = 440;
+      cvs.height = 84;
+      const c = cvs.getContext("2d");
+      c.fillStyle = bgHex;
+      c.beginPath();
+      c.roundRect(4, 4, 432, 76, 38);
+      c.fill();
+      c.lineWidth = 4;
+      c.strokeStyle = borderHex;
+      c.stroke();
+      c.fillStyle = colorHex;
+      c.font = "bold 25px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif";
+      c.textAlign = "center";
+      c.textBaseline = "middle";
+      c.fillText(text, 220, 42);
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.minFilter = THREE.LinearFilter;
+      const mat = new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true });
+      const sp = new THREE.Sprite(mat);
+      sp.scale.set(4.5, 0.86, 1);
+      return sp;
+    }
+
+    function rebuildSceneStations() {
+      activeStations.forEach(st => scene.remove(st.group));
+      activeStations = [];
+      badgeSprites.forEach(b => scene.remove(b));
+      badgeSprites = [];
+
+      const isEn = (currentLang === 'en');
+
+      if (lpsMode === 'compare') {
+        const s1 = createBuildingStation('franklin', -14.5, "FRANKLIN ROD");
+        const s2 = createBuildingStation('ese', 0, "ESE");
+        const s3 = createBuildingStation('das', 14.5, "DAS / CTS");
+        activeStations.push(s1, s2, s3);
+      } else {
+        const titleMap = {
+          franklin: "FRANKLIN ROD",
+          ese: "ESE",
+          das: "DAS / CTS"
+        };
+        const sSingle = createBuildingStation(lpsMode, 0, titleMap[lpsMode]);
+        activeStations.push(sSingle);
+
+        // Add component callout labels on single building (Air Terminal, Down Conductor, Check Terminal, Earthing Rod)
+        const bAir = makeTextBadge(
+          lpsMode === 'franklin'
+            ? (isEn ? "⚡ Air Terminal: Single Franklin Rod" : "⚡ Air Terminal: Franklin Rod Runcing")
+            : lpsMode === 'ese'
+              ? (isEn ? "🚀 Air Terminal: ESE Ionizer Head" : "🚀 Air Terminal: Kepala Ionisasi ESE")
+              : (isEn ? "🛡️ Air Terminal: Multi-Point DAS/CTS" : "🛡️ Air Terminal: Kisi Multi-Runcing DAS"),
+          "#0f2744", "#ffffff", "#004FBD"
+        );
+        bAir.position.set(-4.2, 8.5, 0);
+        scene.add(bAir);
+        badgeSprites.push(bAir);
+
+        const bDC = makeTextBadge(
+          isEn ? "⬇️ Down Conductor (Current Path)" : "⬇️ Down Conductor (Penyalur Petir)",
+          "#0f2744", "#ffffff", "#b45309"
+        );
+        bDC.position.set(6.2, 3.2, 2.4);
+        scene.add(bDC);
+        badgeSprites.push(bDC);
+
+        const bCheck = makeTextBadge(
+          isEn ? "🔍 Check Terminal (Test Box)" : "🔍 Check Terminal (Kotak Uji)",
+          "#0f2744", "#ffffff", "#eab308"
+        );
+        bCheck.position.set(6.2, 1.4, 2.4);
+        scene.add(bCheck);
+        badgeSprites.push(bCheck);
+
+        const bRod = makeTextBadge(
+          isEn ? "🟢 Earthing Rod (Buried in Soil)" : "🟢 Earthing Rod (Elektroda Tanah E)",
+          "#0f2744", "#ffffff", "#16a34a"
+        );
+        bRod.position.set(6.2, -1.6, 2.4);
+        scene.add(bRod);
+        badgeSprites.push(bRod);
+      }
+
+      activeStations.forEach(st => {
+        st.zoneMesh.visible = showProtectionZone;
+        scene.add(st.group);
+      });
+    }
+
+    // =========================================================================
+    // 5. DYNAMIC PLASMA BOLTS: STEPPED LEADER (−), UPWARD STREAMER (+) & RETURN STROKE
+    // =========================================================================
+    function buildJaggedPoints(pStart, pEnd, segments, progress, seedOffset) {
+      const pts = [];
+      const maxSeg = Math.max(1, Math.floor(segments * progress));
+      for (let i = 0; i <= maxSeg; i++) {
+        const f = i / segments;
+        const x = THREE.MathUtils.lerp(pStart.x, pEnd.x, f);
+        const y = THREE.MathUtils.lerp(pStart.y, pEnd.y, f);
+        const z = THREE.MathUtils.lerp(pStart.z, pEnd.z, f);
+        const jitter = (i === 0 || i === segments) ? 0 : Math.sin(i * 3.7 + seedOffset) * 0.48;
+        const jitterZ = (i === 0 || i === segments) ? 0 : Math.cos(i * 2.9 + seedOffset) * 0.25;
+        pts.push(new THREE.Vector3(x + jitter, y, z + jitterZ));
+      }
+      return pts;
+    }
+
+    function updateStationPhysics(st, pct, timeSec) {
+      // Clear previous frame's plasma bolts
+      while (st.plasmaGroup.children.length > 0) {
+        const ch = st.plasmaGroup.children[0];
+        if (ch.geometry) ch.geometry.dispose();
+        st.plasmaGroup.remove(ch);
+      }
+
+      st.zoneMesh.visible = showProtectionZone;
+      const tipY = st.tipWorldY;
+
+      if (st.type === 'das') {
+        // DAS / CTS: Continuous Positive Ion (+) Plume rising to neutralize Cloud (−)
+        st.eseHaloMat.opacity = 0;
+        st.dcMat.emissiveIntensity = 0;
+        st.groundGlowMat.opacity = 0;
+
+        st.dasIonParticles.forEach(p => {
+          const u = (p.offset + timeSec * 0.28) % 1.0;
+          const y = THREE.MathUtils.lerp(tipY + 0.2, 20.6, u);
+          const spread = 1.0 + u * 2.8;
+          const x = Math.cos(p.ang + u * 2.5) * (p.rad * spread);
+          const z = Math.sin(p.ang + u * 2.5) * (p.rad * 0.65);
+          p.sprite.position.set(x, y, z);
+          p.sprite.material.opacity = Math.sin(u * Math.PI) * 0.92;
+        });
+        return;
+      }
+
+      // For Franklin Rod & ESE:
+      // Attachment Point Y:
+      // - Franklin Rod: Upward Streamer is short (attachment at Y = tipY + 1.8 = ~10.0)
+      // - ESE: Early Ionization ΔT launches Upward Streamer MUCH earlier and higher (attachment at Y = tipY + 5.2 = ~13.6)!
+      const attachY = st.type === 'ese' ? (tipY + 5.2) : (tipY + 1.7);
+      const cloudStart = new THREE.Vector3(0, 20.8, 0);
+      const attachPt = new THREE.Vector3(0, attachY, 0);
+      const tipPt = new THREE.Vector3(0, tipY, 0);
+
+      // ESE Early Ionization Glow (Starts at pct >= 18%)
+      if (st.type === 'ese' && pct >= 18 && pct <= 92) {
+        st.eseHaloMat.opacity = 0.45 + 0.25 * Math.sin(timeSec * 16);
+        st.eseHalo.scale.setScalar(1.0 + 0.25 * Math.sin(timeSec * 12));
+      } else {
+        st.eseHaloMat.opacity = 0;
+      }
+
+      // Stage 2 & 3 (20% to 75%): Stepped Leader (−) descending & Upward Streamer (+) rising
+      if (pct >= 20 && pct < 75) {
+        const leaderProg = Math.min(1.0, (pct - 20) / 50);
+        const leaderPts = buildJaggedPoints(cloudStart, attachPt, 18, leaderProg, st.posX + 1.2);
+        if (leaderPts.length >= 2) {
+          const lCurve = new THREE.CatmullRomCurve3(leaderPts);
+          const lMesh = new THREE.Mesh(
+            new THREE.TubeGeometry(lCurve, 28, 0.09, 8, false),
+            new THREE.MeshBasicMaterial({ color: 0x38bdf8 })
+          );
+          st.plasmaGroup.add(lMesh);
+        }
+
+        // Upward Streamer (+):
+        // ESE launches early at pct = 26%; Franklin Rod launches late at pct = 52%!
+        const streamerStartPct = st.type === 'ese' ? 26 : 52;
+        if (pct >= streamerStartPct) {
+          const streamerProg = Math.min(1.0, (pct - streamerStartPct) / (72 - streamerStartPct));
+          const streamerPts = buildJaggedPoints(tipPt, attachPt, 12, streamerProg, st.posX + 4.5);
+          if (streamerPts.length >= 2) {
+            const sCurve = new THREE.CatmullRomCurve3(streamerPts);
+            const sMesh = new THREE.Mesh(
+              new THREE.TubeGeometry(sCurve, 20, 0.085, 8, false),
+              new THREE.MeshBasicMaterial({ color: 0xf43f5e })
+            );
+            st.plasmaGroup.add(sMesh);
+          }
+        }
+      }
+
+      // Stage 4 (75% to 94%): RETURN STROKE (Massive Bright Channel + Down Conductor & Earth Rod Glow!)
+      if (pct >= 75 && pct <= 94) {
+        const fullPts = buildJaggedPoints(cloudStart, tipPt, 24, 1.0, Math.floor(timeSec * 12));
+        const rCurve = new THREE.CatmullRomCurve3(fullPts);
+        const coreBolt = new THREE.Mesh(
+          new THREE.TubeGeometry(rCurve, 36, 0.22, 10, false),
+          new THREE.MeshBasicMaterial({ color: 0xFFF100 })
+        );
+        st.plasmaGroup.add(coreBolt);
+
+        const haloBolt = new THREE.Mesh(
+          new THREE.TubeGeometry(rCurve, 36, 0.48, 10, false),
+          new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.45 })
+        );
+        st.plasmaGroup.add(haloBolt);
+
+        // Glow Down Conductor & Earthing Rod Dissipation
+        st.dcMat.emissive.setHex(0xFFF100);
+        st.dcMat.emissiveIntensity = 1.4;
+        st.groundGlowMat.opacity = 0.75;
+      } else {
+        st.dcMat.emissiveIntensity = 0;
+        st.groundGlowMat.opacity = 0;
+      }
+    }
+
+    // =========================================================================
+    // 6. RIGHT SIDEBAR SVG CURVE & DIAGNOSTICS UPDATE
+    // =========================================================================
+    const pathFranklin = document.getElementById("svg-path-franklin");
+    const pathEse = document.getElementById("svg-path-ese");
+    const pathDas = document.getElementById("svg-path-das");
+    const markerTime = document.getElementById("svg-marker-time");
+
+    function evalCurveY(mode, u) {
+      // Returns SVG Y coordinate (128 = 0 MV/m, 38 = 3.0 MV/m breakdown)
+      if (mode === 'das') {
+        // DAS keeps E field well below breakdown via continuous ion transfer
+        return 122 - 34 * Math.sin(u * Math.PI * 0.95);
+      }
+      if (mode === 'ese') {
+        // ESE rises to trigger at u=0.28, launches streamer, discharges at u=0.75
+        if (u < 0.75) return 124 - (u / 0.75) * 92;
+        return 32 + ((u - 0.75) / 0.25) * 92;
+      }
+      // Franklin Rod rises until breakdown at u=0.75, then drops on Return Stroke
+      if (u < 0.75) return 125 - Math.pow(u / 0.75, 1.25) * 94;
+      return 31 + ((u - 0.75) / 0.25) * 93;
+    }
+
+    function updateSVGChart() {
+      const x0 = 20, w = 295;
+      const steps = 80;
+      let dF = "", dE = "", dD = "";
+
+      for (let i = 0; i <= steps; i++) {
+        const u = i / steps;
+        const sx = (x0 + u * w).toFixed(1);
+        dF += (i === 0 ? "M " : " L ") + sx + " " + evalCurveY('franklin', u).toFixed(1);
+        dE += (i === 0 ? "M " : " L ") + sx + " " + evalCurveY('ese', u).toFixed(1);
+        dD += (i === 0 ? "M " : " L ") + sx + " " + evalCurveY('das', u).toFixed(1);
+      }
+
+      pathFranklin.setAttribute("d", dF);
+      pathEse.setAttribute("d", dE);
+      pathDas.setAttribute("d", dD);
+
+      const uNow = stagePct / 100;
+      const activeCurve = lpsMode === 'compare' ? 'ese' : lpsMode;
+      markerTime.setAttribute("cx", (x0 + uNow * w).toFixed(1));
+      markerTime.setAttribute("cy", evalCurveY(activeCurve, uNow).toFixed(1));
+    }
+
+    function updateStageBanner() {
+      const isEn = (currentLang === 'en');
+      const banner = document.getElementById("stage-banner-pill");
+      const tagVal = document.getElementById("tag-stage-val");
+      tagVal.textContent = `${Math.round(stagePct)}%`;
+
+      if (lpsMode === 'das') {
+        banner.textContent = isEn
+          ? "🛡️ DAS/CTS Active: Positive Ions (+) Rise to Neutralize Cloud (−) → Strike Prevented!"
+          : "🛡️ DAS/CTS Aktif: Ion Positif (+) Naik Menetralkan Awan (−) → Petir Tercegah!";
+        return;
+      }
+
+      if (stagePct < 20) {
+        banner.textContent = isEn
+          ? "Stage 1: Cloud Charge Separation (−) & Ground Surface Induction (+)"
+          : "Tahap 1: Pemisahan Muatan Awan (−) & Induksi Permukaan Bumi (+)";
+      } else if (stagePct < 50) {
+        banner.textContent = lpsMode === 'ese'
+          ? (isEn ? "Stage 2: Stepped Leader (−) Descends & ESE Launches Early Upward Streamer (+)!" : "Tahap 2: Stepped Leader (−) Turun & ESE Meluncurkan Upward Streamer (+) Lebih Awal!")
+          : (isEn ? "Stage 2: Stepped Leader (−) Descends Seeking Lowest Resistance Path" : "Tahap 2: Stepped Leader (−) Merambat Turun Mencari Jalur Resistansi Terendah");
+      } else if (stagePct < 75) {
+        banner.textContent = isEn
+          ? "Stage 3: Upward Streamer (+) Meets Stepped Leader (−) (Plasma Channel)"
+          : "Tahap 3: Upward Streamer (+) Menyambut Stepped Leader (−) (Plasma Channel)";
+      } else {
+        banner.textContent = isEn
+          ? "⚡ Stage 4: RETURN STROKE! Massive Current Flows via Down Conductor to Earthing Rod"
+          : "⚡ Tahap 4: RETURN STROKE! Arus Petir Masif Mengalir lewat Down Conductor ke Earthing Rod";
+      }
+    }
+
+    function updateUIPanels() {
+      const isEn = (currentLang === 'en');
+      const d = LPS_DATA[lpsMode] || LPS_DATA.franklin;
+
+      document.getElementById("edu-title").textContent = isEn ? d.title_en : d.title_id;
+      document.getElementById("edu-desc").textContent = isEn ? d.desc_en : d.desc_id;
+
+      // Sync top pills & dropdown
+      document.getElementById("pill-franklin").classList.toggle("active", lpsMode === 'franklin');
+      document.getElementById("pill-ese").classList.toggle("active", lpsMode === 'ese');
+      document.getElementById("pill-das").classList.toggle("active", lpsMode === 'das');
+      document.getElementById("pill-compare").classList.toggle("active", lpsMode === 'compare');
+      document.getElementById("select-lps").value = lpsMode;
+    }
+
+    // =========================================================================
+    // 7. EVENT LISTENERS & BILINGUAL SWITCHER
+    // =========================================================================
+    function setLPSMode(newMode) {
+      lpsMode = newMode;
+      if (lpsMode === 'compare') {
+        camera.position.set(0, 15, 46);
+        controls.target.set(0, 10.5, 0);
+      } else {
+        camera.position.set(0, 13.5, 34);
+        controls.target.set(0, 10.5, 0);
+      }
+      rebuildSceneStations();
+      updateUIPanels();
+      updateStageBanner();
+    }
+
+    document.getElementById("pill-franklin").addEventListener("click", () => setLPSMode('franklin'));
+    document.getElementById("pill-ese").addEventListener("click", () => setLPSMode('ese'));
+    document.getElementById("pill-das").addEventListener("click", () => setLPSMode('das'));
+    document.getElementById("pill-compare").addEventListener("click", () => setLPSMode('compare'));
+    document.getElementById("select-lps").addEventListener("change", (e) => setLPSMode(e.target.value));
+
+    const rangeStage = document.getElementById("range-stage");
+    const btnAuto = document.getElementById("btn-auto-play");
+
+    function setAutoPlayState(autoOn) {
+      isAutoPlay = autoOn;
+      const isEn = (currentLang === 'en');
+      btnAuto.classList.toggle("target-618", isAutoPlay);
+      btnAuto.textContent = isAutoPlay
+        ? (isEn ? "⏸ Auto Animation: ON" : "⏸ Animasi Otomatis: ON")
+        : (isEn ? "▶ Auto Animation: PAUSED" : "▶ Animasi Otomatis: PAUSE");
+    }
+
+    rangeStage.addEventListener("input", (e) => {
+      stagePct = parseFloat(e.target.value);
+      setAutoPlayState(false);
+      updateStageBanner();
+    });
+
+    btnAuto.addEventListener("click", () => {
+      setAutoPlayState(!isAutoPlay);
+    });
+
+    document.getElementById("btn-step-1").addEventListener("click", () => {
+      stagePct = 15;
+      rangeStage.value = 15;
+      setAutoPlayState(false);
+      updateStageBanner();
+    });
+
+    document.getElementById("btn-step-2").addEventListener("click", () => {
+      stagePct = 58;
+      rangeStage.value = 58;
+      setAutoPlayState(false);
+      updateStageBanner();
+    });
+
+    document.getElementById("btn-step-3").addEventListener("click", () => {
+      stagePct = 82;
+      rangeStage.value = 82;
+      setAutoPlayState(false);
+      updateStageBanner();
+    });
+
+    // Header Buttons
+    const btnCone = document.getElementById("hdr-btn-cone");
+    btnCone.addEventListener("click", () => {
+      showProtectionZone = !showProtectionZone;
+      btnCone.classList.toggle("active", showProtectionZone);
+    });
+
+    const btnCamFull = document.getElementById("hdr-btn-cam-full");
+    const btnCamRoof = document.getElementById("hdr-btn-cam-roof");
+
+    btnCamFull.addEventListener("click", () => {
+      btnCamFull.classList.add("active");
+      btnCamRoof.classList.remove("active");
+      camera.position.set(0, 14, lpsMode === 'compare' ? 46 : 34);
+      controls.target.set(0, 10.5, 0);
+    });
+
+    btnCamRoof.addEventListener("click", () => {
+      btnCamRoof.classList.add("active");
+      btnCamFull.classList.remove("active");
+      camera.position.set(0, 9.2, 13.5);
+      controls.target.set(0, 7.2, 0);
+    });
+
+    const btnFullscreen = document.getElementById("hdr-btn-fullscreen");
+    const viewportCard = document.getElementById("viewport-card");
+    if (btnFullscreen && viewportCard) {
+      btnFullscreen.addEventListener("click", () => {
+        if (!document.fullscreenElement) {
+          if (viewportCard.requestFullscreen) viewportCard.requestFullscreen();
+        } else {
+          if (document.exitFullscreen) document.exitFullscreen();
+        }
+      });
+      document.addEventListener("fullscreenchange", () => {
+        btnFullscreen.classList.toggle("active", !!document.fullscreenElement);
+        setTimeout(handleResize, 80);
+      });
+    }
+
+    // Bilingual Switcher (ID / EN)
+    const btnLang = document.getElementById("hdr-btn-lang");
+    const tagId = document.getElementById("lang-tag-id");
+    const tagEn = document.getElementById("lang-tag-en");
+
+    btnLang.addEventListener("click", () => {
+      currentLang = (currentLang === 'id') ? 'en' : 'id';
+      applyLanguage();
+    });
+
+    function applyLanguage() {
+      const isEn = (currentLang === 'en');
+      tagId.className = isEn ? "" : "lang-active-tag";
+      tagEn.className = isEn ? "lang-active-tag" : "";
+
+      document.getElementById("nav-badge-title").textContent = isEn
+        ? "LIGHTNING PROTECTION: FRANKLIN ROD, ESE & DAS"
+        : "PROTEKSI PETIR: FRANKLIN ROD, ESE & DAS";
+
+      btnCone.textContent = isEn ? "🛡️ Protection Zone" : "🛡️ Zona Proteksi";
+      btnModePan.textContent = isEn ? "✋ Pan Screen" : "✋ Geser Layar";
+      btnCamFull.textContent = isEn ? "🔭 Cloud & Building" : "🔭 Awan & Gedung";
+      btnCamRoof.textContent = isEn ? "🏠 Air Terminal Detail" : "🏠 Detail Air Terminal";
+      btnFullscreen.textContent = isEn ? "⛶ Fullscreen" : "⛶ Layar Penuh";
+
+      document.getElementById("pill-franklin").textContent = "Franklin Rod";
+      document.getElementById("pill-ese").textContent = "ESE";
+      document.getElementById("pill-das").textContent = "DAS / CTS";
+      document.getElementById("pill-compare").textContent = isEn ? "⚡ Compare All 3" : "⚡ Bandingkan 3 Sistem";
+
+      document.getElementById("txt-curve-title").textContent = isEn
+        ? "Electric Field E(t) & System Response"
+        : "Profil Medan Listrik E(t) & Respon Sistem";
+      document.getElementById("lbl-slider-stage").textContent = isEn
+        ? "Lightning Cycle Timeline (1. Induction → 2. Stepped Leader → 3. Upward Streamer → 4. Return Stroke)"
+        : "Linimasa Proses Petir (1. Induksi → 2. Stepped Leader → 3. Upward Streamer → 4. Return Stroke)";
+      document.getElementById("lbl-quick").textContent = isEn ? "Stage Control:" : "Kontrol Tahap:";
+      document.getElementById("lbl-sys-select").textContent = isEn ? "Protection System:" : "Sistem Proteksi:";
+
+      setAutoPlayState(isAutoPlay);
+      rebuildSceneStations();
+      updateUIPanels();
+      updateStageBanner();
+    }
+
+    // =========================================================================
+    // 8. ANIMATION LOOP
+    // =========================================================================
+    let clockSec = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+      clockSec += 0.016;
+
+      if (isAutoPlay) {
+        stagePct = (stagePct + 0.34) % 100;
+        rangeStage.value = stagePct.toFixed(1);
+        updateStageBanner();
+      }
+
+      // Sky Flash Intensity during Return Stroke (for Franklin/ESE/Compare)
+      if (lpsMode !== 'das' && stagePct >= 75 && stagePct <= 94) {
+        flashLight.intensity = 2.6 + Math.sin(clockSec * 45) * 1.2;
+      } else {
+        flashLight.intensity = 0;
+      }
+
+      activeStations.forEach(st => {
+        updateStationPhysics(st, stagePct, clockSec);
+      });
+
+      updateSVGChart();
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    function handleResize() {
+      const size = getViewportSize();
+      if (size.w > 0 && size.h > 0) {
+        camera.aspect = size.w / size.h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(size.w, size.h);
+      }
+    }
+
+    window.addEventListener("resize", handleResize);
+    if (window.ResizeObserver) {
+      new ResizeObserver(handleResize).observe(container);
+    }
+
+    rebuildSceneStations();
+    updateUIPanels();
+    updateStageBanner();
+    animate();
+  </script>
+</body>
+</html>
